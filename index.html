@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tenerife Beach Rank</title>
+    <title>Tenerife Beach Rank + Safety Flags</title>
     <style>
         :root {
             --bg-color: #f0f4f8;
@@ -22,7 +22,7 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            padding-bottom: 100px;
+            padding-bottom: 120px;
         }
 
         header { text-align: center; margin-bottom: 30px; }
@@ -51,14 +51,14 @@
         .lang-btn:hover { transform: scale(1.2); border-color: #3498db; }
         .lang-btn.active { border-color: #3498db; background: #ebf5ff; box-shadow: 0 0 8px rgba(52, 152, 219, 0.5); }
 
-        .subtitle { color: var(--text-light); font-size: 0.9rem; margin-top: 5px; min-height: 1.2em; }
+        .subtitle { color: var(--text-light); font-size: 0.9rem; margin-top: 5px; }
         .last-updated { font-size: 0.8rem; color: #888; margin-top: 10px; font-weight: bold; }
 
         .beach-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -68,43 +68,35 @@
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             transition: transform 0.2s;
-            border-top: 5px solid #ccc;
-            position: relative;
+            border-top: 6px solid #ccc;
         }
 
         .card:hover { transform: translateY(-3px); }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .beach-name { font-size: 1.1rem; font-weight: 700; margin: 0; color: #2c3e50; }
-        .score-badge { background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 1rem; }
+        .score-badge { background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
 
         .metrics {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr; /* Changed to 3 columns since Status is gone */
-            gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
         }
 
         .metric-item {
             background: #f8f9fa;
-            padding: 10px 4px;
+            padding: 8px 2px;
             border-radius: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            min-height: 70px;
+            min-height: 80px;
             justify-content: center;
         }
 
         .metric-emoji { font-size: 1.2rem; margin-bottom: 4px; }
-
-        .metric-label { 
-            font-size: 0.6rem; 
-            color: #777; 
-            text-transform: uppercase;
-            font-weight: bold;
-            width: 100%;
-        }
-        .metric-value { font-weight: 600; font-size: 0.9rem; color: #444; }
+        .metric-label { font-size: 0.55rem; color: #777; text-transform: uppercase; font-weight: bold; letter-spacing: 0.3px; }
+        .metric-value { font-weight: 600; font-size: 0.85rem; color: #444; }
 
         .status-green { border-color: var(--green); }
         .status-green .score-badge { background-color: var(--green); }
@@ -113,7 +105,7 @@
         .status-red { border-color: var(--red); }
         .status-red .score-badge { background-color: var(--red); }
 
-        .loading { text-align: center; grid-column: 1 / -1; padding: 100px; color: #666; }
+        .loading { text-align: center; grid-column: 1 / -1; padding: 100px; color: #666; font-style: italic; }
 
         .main-footer {
             background-color: var(--footer-bg);
@@ -126,7 +118,6 @@
             width: 100%;
             font-size: 13px;
             z-index: 1000;
-            box-sizing: border-box;
         }
     </style>
 </head>
@@ -134,38 +125,36 @@
 
 <header>
     <h1 id="title-text">Tenerife Beach Rank</h1>
-    
     <div class="lang-switcher">
-        <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')" title="English">🇬🇧</button>
-        <button class="lang-btn" id="btn-es" onclick="setLanguage('es')" title="Español">🇪🇸</button>
-        <button class="lang-btn" id="btn-de" onclick="setLanguage('de')" title="Deutsch">🇩🇪</button>
-        <button class="lang-btn" id="btn-fr" onclick="setLanguage('fr')" title="Français">🇫🇷</button>
-        <button class="lang-btn" id="btn-ru" onclick="setLanguage('ru')" title="Русский">🇷🇺</button>
-        <button class="lang-btn" id="btn-nl" onclick="setLanguage('nl')" title="Nederlands">🇳🇱</button>
-        <button class="lang-btn" id="btn-pt" onclick="setLanguage('pt')" title="Português">🇵🇹</button>
+        <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">🇬🇧</button>
+        <button class="lang-btn" id="btn-es" onclick="setLanguage('es')">🇪🇸</button>
+        <button class="lang-btn" id="btn-de" onclick="setLanguage('de')">🇩🇪</button>
+        <button class="lang-btn" id="btn-fr" onclick="setLanguage('fr')">🇫🇷</button>
+        <button class="lang-btn" id="btn-ru" onclick="setLanguage('ru')">🇷🇺</button>
+        <button class="lang-btn" id="btn-nl" onclick="setLanguage('nl')">🇳🇱</button>
+        <button class="lang-btn" id="btn-pt" onclick="setLanguage('pt')">🇵🇹</button>
     </div>
-
-    <div id="subtitle-text" class="subtitle">Live ranking based on Weather, Wind & Clouds</div>
+    <div id="subtitle-text" class="subtitle">Live ranking: Weather, Wind & Wave Safety</div>
     <div id="last-update" class="last-updated">...</div>
 </header>
 
 <div id="app" class="beach-grid">
-    <div class="loading">Fetching live data from Tenerife...</div>
+    <div class="loading">Loading live data from Tenerife...</div>
 </div>
 
 <footer class="main-footer">
-    © 2026 Tenerife Beach Rank. Licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" style="color: #3498db; text-decoration: none;">CC BY-NC 4.0</a>.
+    © 2026 Tenerife Beach Rank. <a href="https://dataraul.github.io/ranking-tenerife-beaches/" style="color: #3498db; text-decoration: none;">Live Site</a>
 </footer>
 
 <script>
     const i18n = {
-        en: { title: "Tenerife Beach Rank", sub: "Live ranking based on Weather, Wind & Clouds", temp: "Temp", wind: "Wind", clouds: "Clouds", update: "Last Update" },
-        es: { title: "Ranking Playas Tenerife", sub: "Clasificación en vivo por clima, viento y nubes", temp: "Temp", wind: "Viento", clouds: "Nubes", update: "Última act." },
-        de: { title: "Teneriffa Strand-Ranking", sub: "Live-Ranking nach Wetter, Wind & Wolken", temp: "Temp", wind: "Wind", clouds: "Wolken", update: "Letztes Update" },
-        fr: { title: "Classement Plages Ténérife", sub: "Classement en direct (Météo, Vent, Nuages)", temp: "Temp", wind: "Vent", clouds: "Nuages", update: "Mis à jour" },
-        ru: { title: "Рейтинг пляжей Тенерифе", sub: "Живой рейтинг: погода, ветер и облака", temp: "Темп.", wind: "Ветер", clouds: "Облака", update: "Обновлено" },
-        nl: { title: "Tenerife Strand Ranglijst", sub: "Live ranglijst op basis van weer en wind", temp: "Temp", wind: "Wind", clouds: "Wolken", update: "Laatste update" },
-        pt: { title: "Ranking Praias Tenerife", sub: "Ranking ao vivo baseado no clima e vento", temp: "Temp", wind: "Vento", clouds: "Nuvens", update: "Última atualiz." }
+        en: { title: "Tenerife Beach Rank", sub: "Live ranking based on Weather, Wind & Waves", temp: "Temp", wind: "Wind", clouds: "Clouds", waves: "Waves", update: "Last Update" },
+        es: { title: "Ranking Playas Tenerife", sub: "Clasificación en vivo por clima, viento y olas", temp: "Temp", wind: "Viento", clouds: "Nubes", waves: "Olas", update: "Última act." },
+        de: { title: "Teneriffa Strand-Ranking", sub: "Live-Ranking nach Wetter, Wind & Wellen", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Wellen", update: "Letztes Update" },
+        fr: { title: "Classement Plages Ténérife", sub: "Classement en direct (Météo, Vent, Vagues)", temp: "Temp", wind: "Vent", clouds: "Nuages", waves: "Vagues", update: "Mis à jour" },
+        ru: { title: "Рейтинг пляжей Тенерифе", sub: "Живой рейтинг: погода, ветер и волны", temp: "Темп.", wind: "Ветер", clouds: "Облака", waves: "Волны", update: "Обновлено" },
+        nl: { title: "Tenerife Strand Ranglijst", sub: "Live ranglijst op basis van weer en golven", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Golven", update: "Laatste update" },
+        pt: { title: "Ranking Praias Tenerife", sub: "Ranking ao vivo baseado no clima e ondas", temp: "Temp", wind: "Vento", clouds: "Nuvens", waves: "Ondas", update: "Última atualiz." }
     };
 
     const beaches = [
@@ -234,24 +223,22 @@
     let currentLang = 'en';
     let globalBeachData = [];
 
-    function getEmojis(beach) {
-        let tempEmoji = beach.temp > 25 ? '🔥' : (beach.temp > 20 ? '☀️' : '🌥️');
-        let windEmoji = beach.wind > 20 ? '🚩' : (beach.wind > 10 ? '🍃' : '💨');
-        let cloudEmoji = beach.clouds > 50 ? '☁️' : (beach.clouds > 15 ? '⛅' : '☀️');
-        return { tempEmoji, windEmoji, cloudEmoji };
-    }
-
     async function fetchWeatherData() {
         const promises = beaches.map(async (beach) => {
             try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${beach.lat}&longitude=${beach.lon}&current=temperature_2m,cloud_cover,wind_speed_10m&wind_speed_unit=kmh`;
-                const response = await fetch(url);
-                const data = await response.json();
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${beach.lat}&longitude=${beach.lon}&current=temperature_2m,cloud_cover,wind_speed_10m&wind_speed_unit=kmh`;
+                const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${beach.lat}&longitude=${beach.lon}&current=wave_height`;
+
+                const [wRes, mRes] = await Promise.all([fetch(weatherUrl), fetch(marineUrl)]);
+                const wData = await wRes.json();
+                const mData = await mRes.json();
+
                 return {
                     name: beach.name,
-                    temp: data.current.temperature_2m,
-                    wind: data.current.wind_speed_10m,
-                    clouds: data.current.cloud_cover
+                    temp: wData.current.temperature_2m,
+                    wind: wData.current.wind_speed_10m,
+                    clouds: wData.current.cloud_cover,
+                    wave: mData.current.wave_height || 0
                 };
             } catch (e) { return null; }
         });
@@ -266,7 +253,6 @@
         let score = 0;
         if (beach.temp >= 22 && beach.temp <= 30) score += 4;
         else if (beach.temp >= 19 && beach.temp < 22) score += 2;
-        else if (beach.temp > 30) score += 3;
         else score += 1;
 
         if (beach.wind < 15) score += 3;
@@ -277,7 +263,26 @@
 
         score = Math.round(score);
         let status = score >= 8 ? 'green' : (score >= 6 ? 'yellow' : 'red');
+
+        // SEA SAFETY BYPASS
+        if (beach.wave > 2.0) status = 'red';
+        else if (beach.wave > 1.2 && status === 'green') status = 'yellow';
+
         return { ...beach, score, status };
+    }
+
+    function getEmojis(beach) {
+        // Wave Flag Logic
+        let waveEmoji = '🟢'; // Calm
+        if (beach.wave > 2.0) waveEmoji = '🔴'; // Danger
+        else if (beach.wave > 1.2) waveEmoji = '🟡'; // Caution
+
+        return {
+            temp: beach.temp > 28 ? '🔥' : (beach.temp > 20 ? '☀️' : '🌥️'),
+            wind: beach.wind > 22 ? '🚩' : (beach.wind > 12 ? '🍃' : '💨'),
+            clouds: beach.clouds > 50 ? '☁️' : (beach.clouds > 15 ? '⛅' : '☀️'),
+            waves: waveEmoji
+        };
     }
 
     function setLanguage(lang) {
@@ -303,7 +308,7 @@
 
         globalBeachData.sort((a, b) => b.score - a.score).forEach(beach => {
             const icons = getEmojis(beach);
-            const html = `
+            app.innerHTML += `
                 <div class="card status-${beach.status}">
                     <div class="card-header">
                         <h2 class="beach-name">${beach.name}</h2>
@@ -311,24 +316,28 @@
                     </div>
                     <div class="metrics">
                         <div class="metric-item">
-                            <span class="metric-emoji">${icons.tempEmoji}</span>
+                            <span class="metric-emoji">${icons.temp}</span>
                             <span class="metric-label">${lang.temp}</span>
                             <span class="metric-value">${beach.temp}°C</span>
                         </div>
                         <div class="metric-item">
-                            <span class="metric-emoji">${icons.windEmoji}</span>
+                            <span class="metric-emoji">${icons.wind}</span>
                             <span class="metric-label">${lang.wind}</span>
                             <span class="metric-value">${beach.wind} <small>km/h</small></span>
                         </div>
                         <div class="metric-item">
-                            <span class="metric-emoji">${icons.cloudEmoji}</span>
+                            <span class="metric-emoji">${icons.clouds}</span>
                             <span class="metric-label">${lang.clouds}</span>
                             <span class="metric-value">${beach.clouds}%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-emoji">${icons.waves}</span>
+                            <span class="metric-label">${lang.waves}</span>
+                            <span class="metric-value">${beach.wave}m</span>
                         </div>
                     </div>
                 </div>
             `;
-            app.innerHTML += html;
         });
     }
 
