@@ -22,13 +22,12 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            padding-bottom: 100px; /* Space for the black footer */
+            padding-bottom: 100px;
         }
 
         header { text-align: center; margin-bottom: 30px; }
-        h1 { margin: 0; font-size: 2rem; color: #2c3e50; transition: all 0.3s; }
+        h1 { margin: 0; font-size: 2rem; color: #2c3e50; }
         
-        /* Language Selector Styles */
         .lang-switcher {
             margin: 15px 0;
             display: flex;
@@ -55,16 +54,14 @@
         .subtitle { color: var(--text-light); font-size: 0.9rem; margin-top: 5px; min-height: 1.2em; }
         .last-updated { font-size: 0.8rem; color: #888; margin-top: 10px; font-weight: bold; }
 
-        /* Grid Layout */
         .beach-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
         }
 
-        /* Card Styles */
         .card {
             background: var(--card-bg);
             border-radius: 12px;
@@ -80,39 +77,35 @@
         .beach-name { font-size: 1.1rem; font-weight: 700; margin: 0; color: #2c3e50; }
         .score-badge { background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 1rem; }
 
-        /* Metrics Grid - Scaling fonts for Dutch/Russian labels */
         .metrics {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            grid-template-columns: 1fr 1fr 1fr; /* Changed to 3 columns since Status is gone */
+            gap: 8px;
         }
 
         .metric-item {
             background: #f8f9fa;
-            padding: 8px 4px;
-            border-radius: 6px;
+            padding: 10px 4px;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            min-height: 55px;
+            min-height: 70px;
             justify-content: center;
         }
 
+        .metric-emoji { font-size: 1.2rem; margin-bottom: 4px; }
+
         .metric-label { 
-            font-size: 0.65rem; 
+            font-size: 0.6rem; 
             color: #777; 
-            margin-bottom: 2px; 
             text-transform: uppercase;
             font-weight: bold;
-            letter-spacing: 0.2px;
             width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
-        .metric-value { font-weight: 600; font-size: 0.95rem; color: #444; }
+        .metric-value { font-weight: 600; font-size: 0.9rem; color: #444; }
 
-        /* Status Colors */
         .status-green { border-color: var(--green); }
         .status-green .score-badge { background-color: var(--green); }
         .status-yellow { border-color: var(--yellow); }
@@ -120,9 +113,8 @@
         .status-red { border-color: var(--red); }
         .status-red .score-badge { background-color: var(--red); }
 
-        .loading { text-align: center; grid-column: 1 / -1; padding: 100px; color: #666; font-style: italic; }
+        .loading { text-align: center; grid-column: 1 / -1; padding: 100px; color: #666; }
 
-        /* Black Footer */
         .main-footer {
             background-color: var(--footer-bg);
             color: #ffffff;
@@ -134,12 +126,8 @@
             width: 100%;
             font-size: 13px;
             z-index: 1000;
-            border-top: 1px solid #333;
             box-sizing: border-box;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
         }
-        .main-footer a { color: #3498db; text-decoration: none; font-weight: bold; }
-        .main-footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -166,22 +154,20 @@
 </div>
 
 <footer class="main-footer">
-    © 2026 Tenerife Beach Rank. Licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a>. Commercial use prohibited.
+    © 2026 Tenerife Beach Rank. Licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" style="color: #3498db; text-decoration: none;">CC BY-NC 4.0</a>.
 </footer>
 
 <script>
-    // --- 1. TRANSLATIONS DICTIONARY ---
     const i18n = {
-        en: { title: "Tenerife Beach Rank", sub: "Live ranking based on Weather, Wind & Clouds", temp: "Temp", wind: "Wind", clouds: "Clouds", status: "Status", update: "Last Update" },
-        es: { title: "Ranking Playas Tenerife", sub: "Clasificación en vivo por clima, viento y nubes", temp: "Temp", wind: "Viento", clouds: "Nubes", status: "Estado", update: "Última act." },
-        de: { title: "Teneriffa Strand-Ranking", sub: "Live-Ranking nach Wetter, Wind & Wolken", temp: "Temp", wind: "Wind", clouds: "Wolken", status: "Status", update: "Letztes Update" },
-        fr: { title: "Classement Plages Ténérife", sub: "Classement en direct (Météo, Vent, Nuages)", temp: "Temp", wind: "Vent", clouds: "Nuages", status: "Statut", update: "Mis à jour" },
-        ru: { title: "Рейтинг пляжей Тенерифе", sub: "Живой рейтинг: погода, ветер и облака", temp: "Темп.", wind: "Ветер", clouds: "Облака", status: "Статус", update: "Обновлено" },
-        nl: { title: "Tenerife Strand Ranglijst", sub: "Live ranglijst op basis van weer en wind", temp: "Temp", wind: "Wind", clouds: "Wolken", status: "Status", update: "Laatste update" },
-        pt: { title: "Ranking Praias Tenerife", sub: "Ranking ao vivo baseado no clima e vento", temp: "Temp", wind: "Vento", clouds: "Nuvens", status: "Status", update: "Última atualiz." }
+        en: { title: "Tenerife Beach Rank", sub: "Live ranking based on Weather, Wind & Clouds", temp: "Temp", wind: "Wind", clouds: "Clouds", update: "Last Update" },
+        es: { title: "Ranking Playas Tenerife", sub: "Clasificación en vivo por clima, viento y nubes", temp: "Temp", wind: "Viento", clouds: "Nubes", update: "Última act." },
+        de: { title: "Teneriffa Strand-Ranking", sub: "Live-Ranking nach Wetter, Wind & Wolken", temp: "Temp", wind: "Wind", clouds: "Wolken", update: "Letztes Update" },
+        fr: { title: "Classement Plages Ténérife", sub: "Classement en direct (Météo, Vent, Nuages)", temp: "Temp", wind: "Vent", clouds: "Nuages", update: "Mis à jour" },
+        ru: { title: "Рейтинг пляжей Тенерифе", sub: "Живой рейтинг: погода, ветер и облака", temp: "Темп.", wind: "Ветер", clouds: "Облака", update: "Обновлено" },
+        nl: { title: "Tenerife Strand Ranglijst", sub: "Live ranglijst op basis van weer en wind", temp: "Temp", wind: "Wind", clouds: "Wolken", update: "Laatste update" },
+        pt: { title: "Ranking Praias Tenerife", sub: "Ranking ao vivo baseado no clima e vento", temp: "Temp", wind: "Vento", clouds: "Nuvens", update: "Última atualiz." }
     };
 
-    // --- 2. FULL LIST OF 60 BEACHES ---
     const beaches = [
         { name: "Playa de Las Vistas", lat: 28.0518, lon: -16.7265 },
         { name: "Playa de Los Cristianos", lat: 28.0504, lon: -16.7226 },
@@ -248,10 +234,14 @@
     let currentLang = 'en';
     let globalBeachData = [];
 
-    // --- 3. LOGIC & API ---
+    function getEmojis(beach) {
+        let tempEmoji = beach.temp > 25 ? '🔥' : (beach.temp > 20 ? '☀️' : '🌥️');
+        let windEmoji = beach.wind > 20 ? '🚩' : (beach.wind > 10 ? '🍃' : '💨');
+        let cloudEmoji = beach.clouds > 50 ? '☁️' : (beach.clouds > 15 ? '⛅' : '☀️');
+        return { tempEmoji, windEmoji, cloudEmoji };
+    }
+
     async function fetchWeatherData() {
-        const updateTime = document.getElementById('last-update');
-        
         const promises = beaches.map(async (beach) => {
             try {
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${beach.lat}&longitude=${beach.lon}&current=temperature_2m,cloud_cover,wind_speed_10m&wind_speed_unit=kmh`;
@@ -263,10 +253,7 @@
                     wind: data.current.wind_speed_10m,
                     clouds: data.current.cloud_cover
                 };
-            } catch (e) { 
-                console.error("Fetch error", e);
-                return null; 
-            }
+            } catch (e) { return null; }
         });
 
         const results = await Promise.all(promises);
@@ -277,15 +264,14 @@
 
     function calculateScore(beach) {
         let score = 0;
-        // Temp (Max 4)
         if (beach.temp >= 22 && beach.temp <= 30) score += 4;
         else if (beach.temp >= 19 && beach.temp < 22) score += 2;
         else if (beach.temp > 30) score += 3;
         else score += 1;
-        // Wind (Max 3)
+
         if (beach.wind < 15) score += 3;
         else if (beach.wind < 25) score += 1.5;
-        // Clouds (Max 3)
+
         if (beach.clouds < 20) score += 3;
         else if (beach.clouds < 50) score += 1.5;
 
@@ -298,11 +284,8 @@
         currentLang = lang;
         document.getElementById('title-text').textContent = i18n[lang].title;
         document.getElementById('subtitle-text').textContent = i18n[lang].sub;
-        
-        // UI feedback for buttons
         document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`btn-${lang}`).classList.add('active');
-        
         renderBeaches();
         updateTimestamp();
     }
@@ -319,6 +302,7 @@
         app.innerHTML = '';
 
         globalBeachData.sort((a, b) => b.score - a.score).forEach(beach => {
+            const icons = getEmojis(beach);
             const html = `
                 <div class="card status-${beach.status}">
                     <div class="card-header">
@@ -327,20 +311,19 @@
                     </div>
                     <div class="metrics">
                         <div class="metric-item">
+                            <span class="metric-emoji">${icons.tempEmoji}</span>
                             <span class="metric-label">${lang.temp}</span>
                             <span class="metric-value">${beach.temp}°C</span>
                         </div>
                         <div class="metric-item">
+                            <span class="metric-emoji">${icons.windEmoji}</span>
                             <span class="metric-label">${lang.wind}</span>
                             <span class="metric-value">${beach.wind} <small>km/h</small></span>
                         </div>
                         <div class="metric-item">
+                            <span class="metric-emoji">${icons.cloudEmoji}</span>
                             <span class="metric-label">${lang.clouds}</span>
                             <span class="metric-value">${beach.clouds}%</span>
-                        </div>
-                         <div class="metric-item">
-                            <span class="metric-label">${lang.status}</span>
-                            <span class="metric-value" style="text-transform: capitalize;">${beach.status}</span>
                         </div>
                     </div>
                 </div>
@@ -349,7 +332,6 @@
         });
     }
 
-    // Initialize the app
     fetchWeatherData();
 </script>
 </body>
