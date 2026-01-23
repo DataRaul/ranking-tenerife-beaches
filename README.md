@@ -1,54 +1,40 @@
 # 🏖️ Tenerife Beach Rank
 
-A real-time ranking dashboard for 60 beaches across Tenerife. This application fetches live meteorological data and ranks beaches based on ideal swimming and sunbathing conditions.
+A real-time weather dashboard that ranks **60 beaches** across Tenerife. The application calculates a live "Beachability Score" out of 10 by analyzing wind, temperature, and cloud cover to help you find the sunniest, calmest spot on the island at any given moment.
 
-## 🚀 Live Demo
-**[[visit the website]](https://dataraul.github.io/ranking-tenerife-beaches/)**
+## ✨ Features
 
----
+* **Smart Ranking:** Beaches are automatically sorted from "Best" to "Worst" based on live conditions.
+* **Emoji-Driven UI:** Visual cues for quick scanning:
+    * 🌡️ **Temperature:** Dynamic icons like 🔥 for heatwaves or ☀️ for perfect warmth.
+    * 🌬️ **Wind:** Visual alerts like 🚩 for high winds or 💨 for light breezes.
+    * ☁️ **Clouds:** Ranges from ☀️ (Clear) to ☁️ (Overcast).
+* **Color-Coded Status:** * 🟢 **Green Top Border:** Perfect conditions (Score 8+).
+    * 🟡 **Yellow Top Border:** Moderate/Acceptable (Score 6-7).
+    * 🔴 **Red Top Border:** Poor conditions for sunbathing (Score < 6).
+* **7 Languages:** Seamlessly switch between 🇬🇧, 🇪🇸, 🇩🇪, 🇫🇷, 🇷🇺, 🇳🇱, and 🇵🇹.
+* **Privacy-Friendly:** No cookies, no tracking, and uses the open-source Open-Meteo API.
 
-## 📊 How it Works
-The application uses the **Open-Meteo API** to fetch high-accuracy weather data for 60 specific GPS coordinates across the island. 
+## 🧮 The Scoring Logic
 
-### **The Ranking Algorithm**
-Every beach is assigned a score from **0 to 10** based on four key metrics:
-1.  **Temperature:** Optimized for the 22°C – 30°C range.
-2.  **Wind Speed:** Penalizes high winds (ideal for El Médano for sports, but low for sunbathing).
-3.  **Cloud Cover:** Higher points for clear, blue skies.
-4.  **Flag Status:** Integrated logic for safety indicators.
+The total score (max 10) is calculated using a weighted algorithm:
 
-### **Color Coding**
-- 🟢 **8-10 Points:** Excellent conditions.
-- 🟡 **6-7 Points:** Fair/Average conditions.
-- 🔴 **Below 6 Points:** Poor conditions (high wind, cold, or cloudy).
+| Factor | Max Points | Optimal Range |
+| :--- | :--- | :--- |
+| **Temperature** | 4 pts | 22°C to 30°C |
+| **Wind Speed** | 3 pts | Under 15 km/h |
+| **Cloud Cover** | 3 pts | Under 20% coverage |
 
----
+## 🚀 Technical Overview
 
-## 🕒 Update Schedule
-The app simulates the standard Canary Island beach report updates:
-* **08:00** - Morning report
-* **11:00** - Mid-day peak
-* **16:00** - Afternoon report
+* **Data Source:** [Open-Meteo API](https://open-meteo.com/) (Real-time weather).
+* **Frontend:** Single-file HTML5/CSS3/Vanilla JS.
+* **Typography:** System-native sans-serif stack for fast loading.
+* **License:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) (Attribution-NonCommercial).
 
-*Note: Since this is a client-side app, data refreshes instantly whenever a user visits the site.*
+## 🛠️ Usage
 
----
-
-## 🛠️ Technology Stack
-- **Frontend:** HTML5, CSS3 (Flexbox/Grid), Vanilla JavaScript.
-- **Data Source:** [Open-Meteo API](https://open-meteo.com/) (No-key required).
-- **Hosting:** GitHub Pages.
-- **Tracking:** [GoatCounter / Analytics]
+Simply open `index.html` in any browser. The script will fetch the current coordinates for all 60 locations and update the ranking instantly.
 
 ---
-
-## 📍 Beaches Included
-The dataset covers 60 locations including:
-- **South:** Las Vistas, El Duque, Fañabé, Abama.
-- **North:** Playa Jardín, El Socorro, Las Teresitas.
-- **Hidden Gems:** Benijo, Montaña Roja, Diego Hernández.
-
----
-
-## 📝 License
-Creative Commons Non-Commercial (CC BY-NC 4.0)
+*Developed for the Tenerife community and visitors. Stay sun-safe!*
