@@ -13,7 +13,8 @@ A real-time weather dashboard that ranks **60 beaches** across Tenerife. The app
     * ☁️ **Clouds:** Ranges from ☀️ (Clear) to ☁️ (Overcast).
     * 🌊 **Waves:** Real-time wave height with safety flags (🟢 🟡 🔴).
 * **Safety Bypass Logic:** High waves (over 2.0m) automatically trigger a **Red** status, regardless of how sunny or warm it is, ensuring user safety.
-* **Color-Coded Status:** * 🟢 **Green Top Border:** Perfect conditions (Score 8+).
+* **Color-Coded Status:**
+    * 🟢 **Green Top Border:** Perfect conditions (Score 8+).
     * 🟡 **Yellow Top Border:** Moderate/Acceptable (Score 6-7).
     * 🔴 **Red Top Border:** Poor conditions or unsafe sea (Score < 6 or High Waves).
 * **7 Languages:** Seamlessly switch between 🇬🇧, 🇪🇸, 🇩🇪, 🇫🇷, 🇷🇺, 🇳🇱, and 🇵🇹.
