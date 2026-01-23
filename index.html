@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenerife Beach Rank</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-main: #333;
+            --text-light: #666;
+            --green: #2ecc71;
+            --yellow: #f1c40f;
+            --red: #e74c3c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0; font-size: 2rem; color: #2c3e50; }
+        .subtitle { color: var(--text-light); font-size: 0.9rem; margin-top: 5px; }
+        .last-updated { font-size: 0.8rem; color: #888; margin-top: 10px; font-weight: bold; }
+
+        /* Grid Layout */
+        .beach-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            border-top: 5px solid #ccc; /* Default color */
+            position: relative;
+        }
+
+        .card:hover { transform: translateY(-3px); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .beach-name { font-size: 1.25rem; font-weight: 700; margin: 0; }
+        
+        .score-badge {
+            background: #333;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        /* Metrics Grid inside Card */
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .metric-item {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .metric-label { font-size: 0.75rem; color: #777; margin-bottom: 2px; text-transform: uppercase; }
+        .metric-value { font-weight: 600; font-size: 1rem; }
+
+        /* Status Colors */
+        .status-green { border-color: var(--green); }
+        .status-green .score-badge { background-color: var(--green); }
+        
+        .status-yellow { border-color: var(--yellow); }
+        .status-yellow .score-badge { background-color: var(--yellow); color: #333; }
+
+        .status-red { border-color: var(--red); }
+        .status-red .score-badge { background-color: var(--red); }
+
+        .loading { text-align: center; grid-column: 1 / -1; padding: 40px; color: #666; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Tenerife Beach Rank</h1>
+    <div class="subtitle">Live ranking based on Weather, Wind & Clouds</div>
+    <div id="last-update" class="last-updated">Updating...</div>
+</header>
+
+<div id="app" class="beach-grid">
+    <div class="loading">Fetching live weather data for Tenerife...</div>
+</div>
+
+<script>
+// --- 1. CONFIGURATION: 60 Beaches of Tenerife ---
+    const beaches = [
+        // --- SOUTH (Tourist Hubs & Golden Sand) ---
+        { name: "Playa de Las Vistas", lat: 28.0518, lon: -16.7265 },
+        { name: "Playa de Los Cristianos", lat: 28.0504, lon: -16.7226 },
+        { name: "Playa del Camisón", lat: 28.0531, lon: -16.7314 },
+        { name: "Playa de las Américas", lat: 28.0583, lon: -16.7358 },
+        { name: "Playa de Troya", lat: 28.0673, lon: -16.7363 },
+        { name: "Playa de Fañabé", lat: 28.0877, lon: -16.7408 },
+        { name: "Playa del Duque", lat: 28.0908, lon: -16.7431 },
+        { name: "Playa de La Pinta", lat: 28.0776, lon: -16.7380 },
+        { name: "Playa del Bobo", lat: 28.0734, lon: -16.7388 },
+        { name: "Playa de Torviscas", lat: 28.0827, lon: -16.7394 },
+        { name: "Playa de La Enramada", lat: 28.0991, lon: -16.7512 },
+        { name: "Playa Diego Hernández", lat: 28.1068, lon: -16.7565 },
+        { name: "Playa de Abama", lat: 28.1697, lon: -16.7932 },
+        { name: "Playa San Juan", lat: 28.1789, lon: -16.8122 },
+        { name: "Playa de Alcalá", lat: 28.1994, lon: -16.8286 },
+        { name: "Playa de la Arena", lat: 28.2285, lon: -16.8407 },
+        { name: "Playa de los Guíos (Los Gigantes)", lat: 28.2464, lon: -16.8431 },
+
+        // --- EL MÉDANO AREA (Wind & Kite Surf) ---
+        { name: "Playa de El Médano", lat: 28.0435, lon: -16.5385 },
+        { name: "Playa de la Tejita", lat: 28.0333, lon: -16.5593 },
+        { name: "Playa de la Pelada", lat: 28.0573, lon: -16.5204 },
+        { name: "Playa del Cabezo", lat: 28.0478, lon: -16.5302 },
+        { name: "Playa de La Mareta", lat: 28.0298, lon: -16.5721 },
+        { name: "Playa de Montaña Roja", lat: 28.0333, lon: -16.5492 },
+
+        // --- SOUTH-EAST (Quiet & Local) ---
+        { name: "Playa de las Galletas", lat: 28.0076, lon: -16.6575 },
+        { name: "Playa de la Ballena", lat: 28.0063, lon: -16.6663 },
+        { name: "Playa Amarilla", lat: 28.0084, lon: -16.6479 },
+        { name: "Playa de Los Abrigos", lat: 28.0264, lon: -16.5916 },
+        { name: "Playa Grande (Porís)", lat: 28.1601, lon: -16.4262 },
+        { name: "Playa de Abades", lat: 28.1404, lon: -16.4422 },
+
+        // --- SANTA CRUZ & ANAGA (North-East / Iconic) ---
+        { name: "Playa de Las Teresitas", lat: 28.5096, lon: -16.1837 },
+        { name: "Playa de Las Gaviotas", lat: 28.5147, lon: -16.1687 },
+        { name: "Playa de Antequera", lat: 28.5447, lon: -16.1264 },
+        { name: "Playa de Benijo", lat: 28.5724, lon: -16.1867 },
+        { name: "Playa de Almáciga", lat: 28.5702, lon: -16.2005 },
+        { name: "Playa del Roque de las Bodegas", lat: 28.5673, lon: -16.2114 },
+        { name: "Playa de Valleseco", lat: 28.4831, lon: -16.2238 },
+
+        // --- NORTH (Black Sand & Wild) ---
+        { name: "Playa Jardín", lat: 28.4168, lon: -16.5574 },
+        { name: "Playa de Martiánez", lat: 28.4189, lon: -16.5383 },
+        { name: "Playa del Castillo", lat: 28.4183, lon: -16.5539 },
+        { name: "Playa del Muelle (Puerto)", lat: 28.4186, lon: -16.5501 },
+        { name: "Playa del Bollullo", lat: 28.4217, lon: -16.5165 },
+        { name: "Playa de los Patos", lat: 28.4239, lon: -16.5076 },
+        { name: "Playa del Ancón", lat: 28.4258, lon: -16.4983 },
+        { name: "Playa del Socorro", lat: 28.3941, lon: -16.6041 },
+        { name: "Playa de San Marcos", lat: 28.3753, lon: -16.7138 },
+        { name: "Playa de Agua Dulce", lat: 28.3789, lon: -16.7725 },
+        
+        // --- NORTH-WEST (Hidden Gems) ---
+        { name: "Playa de Garachico (El Caletón)", lat: 28.3736, lon: -16.7644 },
+        { name: "Playa de la Caleta (Interian)", lat: 28.3768, lon: -16.7877 },
+        { name: "Playa del Puertito (Los Silos)", lat: 28.3721, lon: -16.8164 },
+        
+        // --- HIDDEN & NATURIST SPOTS ---
+        { name: "Playa de la Pelada", lat: 28.0567, lon: -16.5209 },
+        { name: "Playa de la Nea", lat: 28.4068, lon: -16.3214 },
+        { name: "Playa de Radazul", lat: 28.4021, lon: -16.3268 },
+        { name: "Playa de Tabaiba", lat: 28.3975, lon: -16.3353 },
+        { name: "Playa de Lima", lat: 28.3123, lon: -16.3689 },
+        { name: "Playa del Puertito (Adeje)", lat: 28.1152, lon: -16.7656 },
+        { name: "Playa de Callao Salvaje", lat: 28.1221, lon: -16.7765 },
+        { name: "Playa Paraíso", lat: 28.1256, lon: -16.7712 },
+        { name: "Playa del Duque Norte", lat: 28.0934, lon: -16.7456 },
+        { name: "Charco del Viento", lat: 28.3724, lon: -16.7022 },
+        { name: "Bajamar Pools", lat: 28.5562, lon: -16.3475 }, // Popular swimming spot
+        { name: "Punta del Hidalgo", lat: 28.5694, lon: -16.3276 }
+    ];
+    // --- 2. LOGIC ---
+
+    async function fetchWeatherData() {
+        const app = document.getElementById('app');
+        const updateTime = document.getElementById('last-update');
+        
+        // Update the timestamp
+        const now = new Date();
+        updateTime.textContent = `Last Update: ${now.toLocaleTimeString()} (Next updates scheduled 08:00, 11:00, 16:00)`;
+
+        // We fetch data for all beaches
+        // Open-Meteo allows fetching, but for simplicity we loop. 
+        // With <100 beaches and low traffic, individual requests are okay, 
+        // but bulk fetching is better for production. Here is a simple parallel fetch.
+        
+        const promises = beaches.map(async (beach) => {
+            try {
+                // Fetching current weather: Temperature, Wind Speed, Cloud Cover
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${beach.lat}&longitude=${beach.lon}&current=temperature_2m,cloud_cover,wind_speed_10m&wind_speed_unit=kmh`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                return {
+                    name: beach.name,
+                    temp: data.current.temperature_2m,
+                    wind: data.current.wind_speed_10m,
+                    clouds: data.current.cloud_cover,
+                    lat: beach.lat,
+                    lon: beach.lon
+                };
+            } catch (error) {
+                console.error("Error fetching data for", beach.name, error);
+                return null;
+            }
+        });
+
+        const results = await Promise.all(promises);
+        const validResults = results.filter(r => r !== null);
+        
+        // Rank the beaches
+        const rankedBeaches = validResults.map(calculateScore).sort((a, b) => b.score - a.score);
+
+        renderBeaches(rankedBeaches);
+    }
+
+    function calculateScore(beach) {
+        // SCORING ALGORITHM (Adjust thresholds as needed)
+        // 1. Temp: Ideal is 22-30. Too cold < 20. Too hot > 32.
+        // 2. Wind: Ideal is < 15km/h. Bad > 30km/h.
+        // 3. Clouds: Ideal is < 20%. Bad > 80%.
+        
+        let score = 0;
+
+        // Temperature Points (Max 4)
+        if (beach.temp >= 22 && beach.temp <= 30) score += 4;
+        else if (beach.temp >= 19 && beach.temp < 22) score += 2;
+        else if (beach.temp > 30) score += 3;
+        else score += 1; // Cold
+
+        // Wind Points (Max 3)
+        if (beach.wind < 15) score += 3;
+        else if (beach.wind < 25) score += 1.5;
+        else score += 0; // Windy
+
+        // Cloud Points (Max 3)
+        if (beach.clouds < 20) score += 3;
+        else if (beach.clouds < 50) score += 1.5;
+        else score += 0; // Cloudy
+
+        // Normalize to strict integer 0-10
+        score = Math.round(score);
+        if(score > 10) score = 10;
+
+        // Determine Status Color
+        let status = 'red';
+        if (score >= 8) status = 'green';
+        else if (score >= 6) status = 'yellow';
+
+        return { ...beach, score, status };
+    }
+
+    function renderBeaches(data) {
+        const app = document.getElementById('app');
+        app.innerHTML = '';
+
+        data.forEach(beach => {
+            const html = `
+                <div class="card status-${beach.status}">
+                    <div class="card-header">
+                        <h2 class="beach-name">${beach.name}</h2>
+                        <div class="score-badge">${beach.score}/10</div>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric-item">
+                            <span class="metric-label">Temp</span>
+                            <span class="metric-value">${beach.temp}°C</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Wind</span>
+                            <span class="metric-value">${beach.wind} <small>km/h</small></span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Clouds</span>
+                            <span class="metric-value">${beach.clouds}%</span>
+                        </div>
+                         <div class="metric-item">
+                            <span class="metric-label">Status</span>
+                            <span class="metric-value" style="text-transform: capitalize;">${beach.status}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            app.innerHTML += html;
+        });
+    }
+
+    // Initialize
+    fetchWeatherData();
+
+</script>
+
+</body>
+</html>
