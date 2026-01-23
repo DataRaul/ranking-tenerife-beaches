@@ -3,7 +3,7 @@
 A real-time ranking dashboard for 60 beaches across Tenerife. This application fetches live meteorological data and ranks beaches based on ideal swimming and sunbathing conditions.
 
 ## 🚀 Live Demo
-**[INSERT YOUR GITHUB PAGES URL HERE]**
+**[[INSERT YOUR GITHUB PAGES URL HERE]](https://dataraul.github.io/ranking-tenerife-beaches/)**
 
 ---
 
