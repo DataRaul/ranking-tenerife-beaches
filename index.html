@@ -29,7 +29,6 @@
         header { text-align: center; margin-bottom: 20px; }
         h1 { margin: 0; font-size: 2rem; color: #2c3e50; }
         
-        /* Language Switcher with Flags */
         .lang-switcher { margin: 15px 0; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
         .lang-btn {
             background: white; border: 1px solid #ddd; padding: 0; border-radius: 50%;
@@ -40,7 +39,6 @@
         .lang-btn:hover { transform: scale(1.15); border-color: #3498db; }
         .lang-btn.active { border-color: #3498db; background: #ebf5ff; transform: scale(1.1); box-shadow: 0 0 8px rgba(52, 152, 219, 0.4); }
 
-        /* Navigation Buttons */
         .nav-btn {
             background-color: #3498db; color: white; border: none; padding: 12px 24px;
             border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 10px;
@@ -49,11 +47,9 @@
         .nav-btn:hover { background-color: #2980b9; }
         .nav-btn.secondary { background-color: #7f8c8d; }
 
-        /* View Containers */
         #list-view, #map-view { display: none; }
         .active-view { display: block !important; }
 
-        /* Map Styling */
         #map-container {
             height: 75vh; width: 100%; border-radius: 12px; border: 2px solid #ddd;
             margin-top: 20px;
@@ -62,7 +58,6 @@
         .subtitle { color: var(--text-light); font-size: 0.9rem; margin-top: 5px; }
         .last-updated { font-size: 0.8rem; color: #888; margin-top: 10px; font-weight: bold; }
 
-        /* Grid Layout */
         .beach-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -71,7 +66,6 @@
             margin: 0 auto;
         }
 
-        /* Cards */
         .card {
             background: var(--card-bg); border-radius: 12px; padding: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s;
@@ -81,17 +75,14 @@
         
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
         
-        /* Beach Name Link Styling */
         .beach-name-link { text-decoration: none; color: inherit; flex-grow: 1; display: block; }
         .beach-name { font-size: 1.1rem; font-weight: 700; margin: 0; color: #2c3e50; transition: color 0.2s; }
         .beach-name:hover { color: #3498db; text-decoration: underline; }
         
         .town-name { font-size: 0.85rem; color: #7f8c8d; margin-top: 2px; font-weight: 500; }
         .click-hint { font-size: 0.7rem; color: #3498db; margin-top: 2px; display: block; font-weight: normal; }
-
         .score-badge { background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold; margin-left: 10px; white-space: nowrap; }
 
-        /* Metrics Grid */
         .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 15px; }
         .metric-item {
             background: #f8f9fa; padding: 8px 2px; border-radius: 8px;
@@ -102,7 +93,6 @@
         .metric-label { font-size: 0.55rem; color: #777; text-transform: uppercase; font-weight: bold; letter-spacing: 0.3px; }
         .metric-value { font-weight: 600; font-size: 0.85rem; color: #444; }
 
-        /* Status Colors */
         .status-green { border-color: var(--green); }
         .status-green .score-badge { background-color: var(--green); }
         .status-yellow { border-color: var(--yellow); }
@@ -123,7 +113,6 @@
 
 <header>
     <h1 id="title-text">Tenerife Beach Rank</h1>
-    
     <div class="lang-switcher">
         <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">🇬🇧</button>
         <button class="lang-btn" id="btn-es" onclick="setLanguage('es')">🇪🇸</button>
@@ -133,7 +122,6 @@
         <button class="lang-btn" id="btn-nl" onclick="setLanguage('nl')">🇳🇱</button>
         <button class="lang-btn" id="btn-pt" onclick="setLanguage('pt')">🇵🇹</button>
     </div>
-    
     <div id="subtitle-text" class="subtitle">Live ranking: Weather, Wind & Wave Safety</div>
     <div id="last-update" class="last-updated">...</div>
 </header>
@@ -236,7 +224,7 @@
         { name:"Playa La Arena", town:"Tacoronte", coast:"north", lat:28.5003, lon:-16.4245 },
         { name:"Playa Blanca", town:"Costa Adeje", coast:"south", lat:28.1050, lon:-16.7765 },
         { name:"Playa El Bollullo Natural", town:"La Orotava", coast:"north", lat:28.4200, lon:-16.5180 },
-        { name:"Playa El Porís", town:"El Porís", coast:"east", lat:28.1601, lon:-16.4262 }
+        { name:"Playa El Porís", town:"El Porís", coast:"east", lat:28.1601, lon:-16.4262 },
         { name:"Playa de Los Patos Oeste", town:"La Orotava", coast:"north", lat:28.4245, lon:-16.5090},
         { name:"Playa de El Puertito", town:"Garachico", coast:"northwest", lat:28.3715, lon:-16.8180},
         { name:"Playa de El Socorro Sur", town:"Los Realejos", coast:"north", lat:28.3950, lon:-16.6020},
@@ -285,34 +273,45 @@
     let markers = [];
 
     async function fetchWeatherData() {
-        const promises = beaches.map(async (beach) => {
-            try {
-                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${beach.lat}&longitude=${beach.lon}&current=temperature_2m,cloud_cover,wind_speed_10m&wind_speed_unit=kmh`;
-                const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${beach.lat}&longitude=${beach.lon}&current=wave_height`;
+        try {
+            // OPTIMIZATION: BATCH REQUESTS
+            // Instead of 100+ separate calls, we send all coordinates in ONE string.
+            const lats = beaches.map(b => b.lat).join(',');
+            const lons = beaches.map(b => b.lon).join(',');
 
-                const [wRes, mRes] = await Promise.all([fetch(weatherUrl), fetch(marineUrl)]);
-                const wData = await wRes.json();
-                const mData = await mRes.json();
+            const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,cloud_cover,wind_speed_10m&wind_speed_unit=kmh`;
+            const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lats}&longitude=${lons}&current=wave_height`;
 
-                return {
+            const [wRes, mRes] = await Promise.all([fetch(weatherUrl), fetch(marineUrl)]);
+            const wData = await wRes.json();
+            const mData = await mRes.json();
+
+            // Open-Meteo returns an array of objects when multiple lats/lons are provided
+            globalBeachData = beaches.map((beach, index) => {
+                const weather = Array.isArray(wData) ? wData[index] : wData;
+                const marine = Array.isArray(mData) ? mData[index] : mData;
+
+                const rawData = {
                     name: beach.name,
                     town: beach.town,
-                    coast: beach.coast, // Needed for scoring logic
+                    coast: beach.coast,
                     lat: beach.lat,
                     lon: beach.lon,
-                    temp: wData.current.temperature_2m,
-                    wind: wData.current.wind_speed_10m,
-                    clouds: wData.current.cloud_cover,
-                    wave: mData.current.wave_height || 0
+                    temp: weather.current.temperature_2m,
+                    wind: weather.current.wind_speed_10m,
+                    clouds: weather.current.cloud_cover,
+                    wave: marine.current.wave_height || 0
                 };
-            } catch (e) { return null; }
-        });
+                return calculateScore(rawData);
+            });
 
-        const results = await Promise.all(promises);
-        globalBeachData = results.filter(r => r !== null).map(calculateScore);
-        renderBeaches();
-        if(map) updateMapMarkers();
-        updateTimestamp();
+            renderBeaches();
+            if(map) updateMapMarkers();
+            updateTimestamp();
+        } catch (e) {
+            console.error("API Error:", e);
+            document.getElementById('app').innerHTML = '<div class="loading">Error loading data. Please refresh later.</div>';
+        }
     }
 
     function calculateScore(beach) {
@@ -321,7 +320,6 @@
         else if (beach.temp >= 19 && beach.temp < 22) score += 2;
         else score += 1;
 
-        // WIND RELAXED LOGIC (Less punished)
         if (beach.wind < 20) score += 3;
         else if (beach.wind < 30) score += 1.5;
 
@@ -331,9 +329,7 @@
         score = Math.round(score);
         let status = score >= 8 ? 'green' : (score >= 6 ? 'yellow' : 'red');
 
-        // SEA SAFETY BYPASS (Adjusted for North Coast)
         const isNorth = beach.coast === 'north' || beach.coast === 'northwest';
-        
         const redLimit = isNorth ? 2.5 : 2.0;
         const yellowLimit = isNorth ? 1.5 : 1.2;
 
@@ -347,7 +343,6 @@
         let waveEmoji = '🟢';
         if (beach.wave > beach.waveLimits.red) waveEmoji = '🔴';
         else if (beach.wave > beach.waveLimits.yellow) waveEmoji = '🟡';
-
         return {
             temp: beach.temp > 28 ? '🔥' : (beach.temp > 20 ? '☀️' : '🌥️'),
             wind: beach.wind > 22 ? '🚩' : (beach.wind > 12 ? '🍃' : '💨'),
@@ -363,7 +358,6 @@
         document.getElementById('subtitle-text').textContent = data.sub;
         document.querySelector('button[onclick="showMap()"]').textContent = data.btnMap;
         document.querySelector('button[onclick="showList()"]').textContent = data.btnBack;
-        
         document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`btn-${lang}`).classList.add('active');
         renderBeaches();
@@ -383,9 +377,7 @@
 
         globalBeachData.sort((a, b) => b.score - a.score).forEach(beach => {
             const icons = getEmojis(beach);
-            // Google Maps Link (Universal format)
-            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${beach.lat},${beach.lon}`;
-
+            const mapsUrl = `https://www.google.com/maps?q=${beach.lat},${beach.lon}`;
             app.innerHTML += `
                 <div class="card status-${beach.status}">
                     <div class="card-header">
@@ -397,37 +389,18 @@
                         <div class="score-badge">${beach.score}/10</div>
                     </div>
                     <div class="metrics">
-                        <div class="metric-item">
-                            <span class="metric-emoji">${icons.temp}</span>
-                            <span class="metric-label">${langData.temp}</span>
-                            <span class="metric-value">${beach.temp}°C</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="metric-emoji">${icons.wind}</span>
-                            <span class="metric-label">${langData.wind}</span>
-                            <span class="metric-value">${beach.wind} <small>km/h</small></span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="metric-emoji">${icons.clouds}</span>
-                            <span class="metric-label">${langData.clouds}</span>
-                            <span class="metric-value">${beach.clouds}%</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="metric-emoji">${icons.waves}</span>
-                            <span class="metric-label">${langData.waves}</span>
-                            <span class="metric-value">${beach.wave}m</span>
-                        </div>
+                        <div class="metric-item"><span class="metric-emoji">${icons.temp}</span><span class="metric-label">${langData.temp}</span><span class="metric-value">${beach.temp}°C</span></div>
+                        <div class="metric-item"><span class="metric-emoji">${icons.wind}</span><span class="metric-label">${langData.wind}</span><span class="metric-value">${beach.wind} <small>km/h</small></span></div>
+                        <div class="metric-item"><span class="metric-emoji">${icons.clouds}</span><span class="metric-label">${langData.clouds}</span><span class="metric-value">${beach.clouds}%</span></div>
+                        <div class="metric-item"><span class="metric-emoji">${icons.waves}</span><span class="metric-label">${langData.waves}</span><span class="metric-value">${beach.wave}m</span></div>
                     </div>
-                </div>
-            `;
+                </div>`;
         });
     }
 
-    // --- VIEW SWITCHING LOGIC ---
     function showMap() {
         document.getElementById('list-view').classList.remove('active-view');
         document.getElementById('map-view').classList.add('active-view');
-        
         if (!map) initMap();
         else setTimeout(() => { map.invalidateSize(); }, 100); 
     }
@@ -439,9 +412,7 @@
 
     function initMap() {
         map = L.map('map-container').setView([28.2916, -16.6291], 10);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
         updateMapMarkers();
     }
 
@@ -449,16 +420,9 @@
         if (!map || globalBeachData.length === 0) return;
         markers.forEach(marker => map.removeLayer(marker));
         markers = [];
-
         globalBeachData.forEach(beach => {
-            let color = '#2ecc71';
-            if (beach.status === 'yellow') color = '#f1c40f';
-            if (beach.status === 'red') color = '#e74c3c';
-
-            const marker = L.circleMarker([beach.lat, beach.lon], {
-                radius: 8, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8
-            }).addTo(map);
-
+            let color = beach.status === 'green' ? '#2ecc71' : (beach.status === 'yellow' ? '#f1c40f' : '#e74c3c');
+            const marker = L.circleMarker([beach.lat, beach.lon], { radius: 8, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8 }).addTo(map);
             marker.bindPopup(`<b>${beach.name}</b><br>Score: ${beach.score}/10<br>Waves: ${beach.wave}m`);
             markers.push(marker);
         });
@@ -468,5 +432,3 @@
 </script>
 </body>
 </html>
-
-
