@@ -84,6 +84,7 @@
         .metric-label { font-size: 0.5rem; color: #777; font-weight: bold; text-transform: uppercase; }
         .metric-value { font-weight: 600; font-size: 0.8rem; }
         .metric-emoji { font-size: 1.1rem; margin-bottom: 2px; }
+        .swell-arrow { display: inline-block; font-size: 1rem; line-height: 1; }
 
         .status-green { border-color: var(--green); }
         .status-yellow { border-color: var(--yellow); }
@@ -119,7 +120,6 @@
     <button class="filter-btn" onclick="setFilter('east')">East</button>
     <button class="filter-btn" onclick="setFilter('west')">West</button>
     <button class="filter-btn special" onclick="setFilter('surfing')">🏄 Surf Live</button>
-    <button class="filter-btn special" onclick="setFilter('family')">👨‍👩‍👧 Family Live</button>
 </div>
 
 <div id="list-view" class="active-view">
@@ -135,58 +135,57 @@
 </div>
 
 <footer class="main-footer">
-    © 2026 Tenerife Beach Rank. Data: Open-Meteo & Marine API.
+    © 2026 Tenerife Beach Rank License: CC BY-NC 4.0. Data: Open-Meteo & Marine API.
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     const i18n = {
-        en: { title: "Tenerife Beach Rank", temp: "Temp", wind: "Wind", clouds: "Clouds", waves: "Waves", updated: "Updated" },
-        es: { title: "Ranking Playas Tenerife", temp: "Temp", wind: "Viento", clouds: "Nubes", waves: "Olas", updated: "Act." },
-        de: { title: "Strand-Ranking", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Wellen", updated: "Update" },
-        fr: { title: "Classement Plages", temp: "Temp", wind: "Vent", clouds: "Nuages", waves: "Vagues", updated: "Mis à jour" },
-        ru: { title: "Рейтинг пляжей", temp: "Темп", wind: "Ветер", clouds: "Обл.", waves: "Волны", updated: "Обновлено" },
-        nl: { title: "Strand Ranglijst", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Golven", updated: "Update" },
-        pt: { title: "Ranking Praias", temp: "Temp", wind: "Vento", clouds: "Nuvens", waves: "Ondas", updated: "Atu." }
+        en: { title: "Tenerife Beach Rank", temp: "Temp", wind: "Wind", clouds: "Clouds", waves: "Waves", updated: "Updated", swell: "Swell" },
+        es: { title: "Ranking Playas Tenerife", temp: "Temp", wind: "Viento", clouds: "Nubes", waves: "Olas", updated: "Act.", swell: "Mar" },
+        de: { title: "Strand-Ranking", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Wellen", updated: "Update", swell: "Dünung" },
+        fr: { title: "Classement Plages", temp: "Temp", wind: "Vent", clouds: "Nuages", waves: "Vagues", updated: "Mis à jour", swell: "Houle" },
+        ru: { title: "Рейтинг пляжей", temp: "Темп", wind: "Ветер", clouds: "Обл.", waves: "Волны", updated: "Обновлено", swell: "Зыбь" },
+        nl: { title: "Strand Ranglijst", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Golven", updated: "Update", swell: "Deining" },
+        pt: { title: "Ranking Praias", temp: "Temp", wind: "Vento", clouds: "Nuvens", waves: "Ondas", updated: "Atu.", swell: "Ondul." }
     };
 
-    // Beach Data with Activity Tags (type: 'surf' or 'family' or null)
     const beaches = [
-        { name:"Playa de Las Vistas", town:"Los Cristianos", coast:"south", type:"family", lat:28.0518, lon:-16.7265 },
-        { name:"Playa de Los Cristianos", town:"Los Cristianos", coast:"south", type:"family", lat:28.0504, lon:-16.7226 },
-        { name:"Playa del Camisón", town:"Las Américas", coast:"south", type:"family", lat:28.0531, lon:-16.7314 },
+        { name:"Playa de Las Vistas", town:"Los Cristianos", coast:"south", type:null, lat:28.0518, lon:-16.7265 },
+        { name:"Playa de Los Cristianos", town:"Los Cristianos", coast:"south", type:null, lat:28.0504, lon:-16.7226 },
+        { name:"Playa del Camisón", town:"Las Américas", coast:"south", type:null, lat:28.0531, lon:-16.7314 },
         { name:"Playa de las Américas", town:"Las Américas", coast:"south", type:"surf", lat:28.0583, lon:-16.7358 },
-        { name:"Playa de Troya", town:"Costa Adeje", coast:"south", type:"family", lat:28.0673, lon:-16.7363 },
-        { name:"Playa de Fañabé", town:"Costa Adeje", coast:"south", type:"family", lat:28.0877, lon:-16.7408 },
-        { name:"Playa del Duque", town:"Costa Adeje", coast:"south", type:"family", lat:28.0908, lon:-16.7431 },
-        { name:"Playa de La Pinta", town:"Costa Adeje", coast:"south", type:"family", lat:28.0776, lon:-16.7380 },
-        { name:"Playa del Bobo", town:"Costa Adeje", coast:"south", type:"family", lat:28.0734, lon:-16.7388 },
-        { name:"Playa de Torviscas", town:"Costa Adeje", coast:"south", type:"family", lat:28.0827, lon:-16.7394 },
+        { name:"Playa de Troya", town:"Costa Adeje", coast:"south", type:null, lat:28.0673, lon:-16.7363 },
+        { name:"Playa de Fañabé", town:"Costa Adeje", coast:"south", type:null, lat:28.0877, lon:-16.7408 },
+        { name:"Playa del Duque", town:"Costa Adeje", coast:"south", type:null, lat:28.0908, lon:-16.7431 },
+        { name:"Playa de La Pinta", town:"Costa Adeje", coast:"south", type:null, lat:28.0776, lon:-16.7380 },
+        { name:"Playa del Bobo", town:"Costa Adeje", coast:"south", type:null, lat:28.0734, lon:-16.7388 },
+        { name:"Playa de Torviscas", town:"Costa Adeje", coast:"south", type:null, lat:28.0827, lon:-16.7394 },
         { name:"Playa de La Enramada", town:"Costa Adeje", coast:"south", type:"surf", lat:28.0991, lon:-16.7512 },
         { name:"Playa Diego Hernández", town:"La Caleta", coast:"south", type:null, lat:28.1068, lon:-16.7565 },
-        { name:"Playa de Abama", town:"Guía de Isora", coast:"south", type:"family", lat:28.1697, lon:-16.7932 },
-        { name:"Playa San Juan", town:"Playa San Juan", coast:"southwest", type:"family", lat:28.1789, lon:-16.8122 },
+        { name:"Playa de Abama", town:"Guía de Isora", coast:"south", type:null, lat:28.1697, lon:-16.7932 },
+        { name:"Playa San Juan", town:"Playa San Juan", coast:"southwest", type:null, lat:28.1789, lon:-16.8122 },
         { name:"Playa de Alcalá", town:"Alcalá", coast:"southwest", type:null, lat:28.1994, lon:-16.8286 },
-        { name:"Playa de la Arena", town:"Puerto Santiago", coast:"west", type:"family", lat:28.2285, lon:-16.8407 },
-        { name:"Playa de los Guíos", town:"Gigantes", coast:"west", type:"family", lat:28.2464, lon:-16.8431 },
+        { name:"Playa de la Arena", town:"Puerto Santiago", coast:"west", type:null, lat:28.2285, lon:-16.8407 },
+        { name:"Playa de los Guíos", town:"Gigantes", coast:"west", type:null, lat:28.2464, lon:-16.8431 },
         { name:"Playa de El Médano", town:"El Médano", coast:"east", type:"surf", lat:28.0435, lon:-16.5385 },
         { name:"Playa de la Tejita", town:"El Médano", coast:"east", type:null, lat:28.0333, lon:-16.5593 },
         { name:"Playa de la Pelada", town:"El Médano", coast:"east", type:"surf", lat:28.0573, lon:-16.5204 },
         { name:"Playa del Cabezo", town:"El Médano", coast:"east", type:"surf", lat:28.0478, lon:-16.5302 },
         { name:"Playa de La Mareta", town:"El Médano", coast:"east", type:null, lat:28.0298, lon:-16.5721 },
         { name:"Playa de Montaña Roja", town:"El Médano", coast:"east", type:null, lat:28.0333, lon:-16.5492 },
-        { name:"Playa de las Galletas", town:"Las Galletas", coast:"south", type:"family", lat:28.0076, lon:-16.6575 },
+        { name:"Playa de las Galletas", town:"Las Galletas", coast:"south", type:null, lat:28.0076, lon:-16.6575 },
         { name:"Playa de la Ballena", town:"Las Galletas", coast:"south", type:null, lat:28.0063, lon:-16.6663 },
         { name:"Playa Amarilla", town:"Las Galletas", coast:"south", type:null, lat:28.0084, lon:-16.6479 },
         { name:"Playa de Los Abrigos", town:"Los Abrigos", coast:"south", type:null, lat:28.0264, lon:-16.5916 },
         { name:"Playa Grande (Porís)", town:"El Porís", coast:"east", type:null, lat:28.1601, lon:-16.4262 },
-        { name:"Playa de Las Teresitas", town:"San Andrés", coast:"north", type:"family", lat:28.5096, lon:-16.1837 },
+        { name:"Playa de Las Teresitas", town:"San Andrés", coast:"north", type:null, lat:28.5096, lon:-16.1837 },
         { name:"Playa de Las Gaviotas", town:"San Andrés", coast:"north", type:null, lat:28.5147, lon:-16.1687 },
         { name:"Playa de Antequera", town:"Anaga", coast:"north", type:null, lat:28.5447, lon:-16.1264 },
         { name:"Playa de Benijo", town:"Taganana", coast:"north", type:"surf", lat:28.5724, lon:-16.1867 },
         { name:"Playa de Almáciga", town:"Taganana", coast:"north", type:"surf", lat:28.5702, lon:-16.2005 },
         { name:"Playa del Roque", town:"Taganana", coast:"north", type:"surf", lat:28.5673, lon:-16.2114 },
-        { name:"Playa de Valleseco", town:"S.C. Tenerife", coast:"north", type:"family", lat:28.4831, lon:-16.2238 },
+        { name:"Playa de Valleseco", town:"S.C. Tenerife", coast:"north", type:null, lat:28.4831, lon:-16.2238 },
         { name:"Playa Jardín", town:"Puerto Cruz", coast:"north", type:"surf", lat:28.4168, lon:-16.5574 },
         { name:"Playa de Martiánez", town:"Puerto Cruz", coast:"north", type:"surf", lat:28.4189, lon:-16.5383 },
         { name:"Playa del Castillo", town:"Puerto Cruz", coast:"north", type:null, lat:28.4183, lon:-16.5539 },
@@ -195,56 +194,56 @@
         { name:"Playa de los Patos", town:"La Orotava", coast:"north", type:"surf", lat:28.4239, lon:-16.5076 },
         { name:"Playa del Ancón", town:"La Guancha", coast:"north", type:null, lat:28.4258, lon:-16.4983 },
         { name:"Playa del Socorro", town:"Los Realejos", coast:"north", type:"surf", lat:28.3941, lon:-16.6041 },
-        { name:"Playa de San Marcos", town:"Icod", coast:"north", type:"family", lat:28.3753, lon:-16.7138 },
+        { name:"Playa de San Marcos", town:"Icod", coast:"north", type:null, lat:28.3753, lon:-16.7138 },
         { name:"Playa de Agua Dulce", town:"Icod", coast:"north", type:null, lat:28.3789, lon:-16.7725 },
         { name:"Playa de Garachico", town:"Garachico", coast:"north", type:null, lat:28.3736, lon:-16.7644 },
         { name:"Playa de la Caleta", town:"Garachico", coast:"northwest", type:null, lat:28.3768, lon:-16.7877 },
         { name:"Playa del Puertito", town:"Garachico", coast:"northwest", type:null, lat:28.3721, lon:-16.8164 },
-        { name:"Playa de la Nea", town:"Radazul", coast:"east", type:"family", lat:28.4068, lon:-16.3214 },
-        { name:"Playa de Radazul", town:"Radazul", coast:"east", type:"family", lat:28.4021, lon:-16.3268 },
+        { name:"Playa de la Nea", town:"Radazul", coast:"east", type:null, lat:28.4068, lon:-16.3214 },
+        { name:"Playa de Radazul", town:"Radazul", coast:"east", type:null, lat:28.4021, lon:-16.3268 },
         { name:"Playa de Tabaiba", town:"Tabaiba", coast:"east", type:null, lat:28.3975, lon:-16.3353 },
         { name:"Playa de Lima", town:"Boca Cangrejo", coast:"east", type:null, lat:28.3123, lon:-16.3689 },
         { name:"Playa Adeje", town:"Adeje", coast:"south", type:null, lat:28.1152, lon:-16.7656 },
-        { name:"Playa Callao Salvaje", town:"Callao Salvaje", coast:"south", type:"family", lat:28.1221, lon:-16.7765 },
+        { name:"Playa Callao Salvaje", town:"Callao Salvaje", coast:"south", type:null, lat:28.1221, lon:-16.7765 },
         { name:"Playa Paraíso", town:"Playa Paraíso", coast:"south", type:null, lat:28.1256, lon:-16.7712 },
-        { name:"Playa del Duque Norte", town:"Costa Adeje", coast:"south", type:"family", lat:28.0934, lon:-16.7456 },
+        { name:"Playa del Duque Norte", town:"Costa Adeje", coast:"south", type:null, lat:28.0934, lon:-16.7456 },
         { name:"Charco del Viento", town:"La Guancha", coast:"north", type:null, lat:28.3724, lon:-16.7022 },
-        { name:"Bajamar Pools", town:"Bajamar", coast:"north", type:"family", lat:28.5562, lon:-16.3475 },
+        { name:"Bajamar Pools", town:"Bajamar", coast:"north", type:null, lat:28.5562, lon:-16.3475 },
         { name:"Punta del Hidalgo", town:"Punta Hidalgo", coast:"north", type:"surf", lat:28.5694, lon:-16.3276 },
         { name:"Playa Chimisay", town:"Güímar", coast:"east", type:null, lat:28.3465, lon:-16.4352 },
         { name:"Playa El Socorro", town:"El Socorro", coast:"north", type:"surf", lat:28.3588, lon:-16.5841 },
         { name:"Playa La Arena", town:"Tacoronte", coast:"north", type:null, lat:28.5003, lon:-16.4245 },
         { name:"Playa Blanca", town:"Costa Adeje", coast:"south", type:null, lat:28.1050, lon:-16.7765 },
         { name:"Playa El Bollullo Nat.", town:"La Orotava", coast:"north", type:null, lat:28.4200, lon:-16.5180 },
-        { name:"Playa El Porís", town:"El Porís", coast:"east", type:"family", lat:28.1601, lon:-16.4262 },
+        { name:"Playa El Porís", town:"El Porís", coast:"east", type:null, lat:28.1601, lon:-16.4262 },
         { name:"Playa de Los Patos O.", town:"La Orotava", coast:"north", type:"surf", lat:28.4245, lon:-16.5090},
         { name:"Playa de El Puertito", town:"Garachico", coast:"northwest", type:null, lat:28.3715, lon:-16.8180},
         { name:"Playa de El Socorro S.", town:"Los Realejos", coast:"north", type:"surf", lat:28.3950, lon:-16.6020},
-        { name:"Playa de San Juan N.", town:"Playa San Juan", coast:"southwest", type:"family", lat:28.1795, lon:-16.8130},
+        { name:"Playa de San Juan N.", town:"Playa San Juan", coast:"southwest", type:null, lat:28.1795, lon:-16.8130},
         { name:"Playa de la Jaquita", town:"Bajamar", coast:"north", type:null, lat:28.5568, lon:-16.3445},
         { name:"Playa del Ancón Sur", town:"La Guancha", coast:"north", type:null, lat:28.4250, lon:-16.5000},
         { name:"Playa Chimisay Sur", town:"Güímar", coast:"east", type:null, lat:28.3450, lon:-16.4370},
-        { name:"Playa El Camisón N.", town:"Las Américas", coast:"south", type:"family", lat:28.0550, lon:-16.7320},
-        { name:"Playa La Pinta Norte", town:"Costa Adeje", coast:"south", type:"family", lat:28.0785, lon:-16.7385},
-        { name:"Playa del Bobo Sur", town:"Costa Adeje", coast:"south", type:"family", lat:28.0740, lon:-16.7392},
-        { name:"Playa Torviscas N.", town:"Costa Adeje", coast:"south", type:"family", lat:28.0835, lon:-16.7397},
+        { name:"Playa El Camisón N.", town:"Las Américas", coast:"south", type:null, lat:28.0550, lon:-16.7320},
+        { name:"Playa La Pinta Norte", town:"Costa Adeje", coast:"south", type:null, lat:28.0785, lon:-16.7385},
+        { name:"Playa del Bobo Sur", town:"Costa Adeje", coast:"south", type:null, lat:28.0740, lon:-16.7392},
+        { name:"Playa Torviscas N.", town:"Costa Adeje", coast:"south", type:null, lat:28.0835, lon:-16.7397},
         { name:"Playa Diego Hdez N.", town:"La Caleta", coast:"south", type:null, lat:28.1075, lon:-16.7568},
-        { name:"Playa de Abama N.", town:"Guía de Isora", coast:"south", type:"family", lat:28.1705, lon:-16.7935},
+        { name:"Playa de Abama N.", town:"Guía de Isora", coast:"south", type:null, lat:28.1705, lon:-16.7935},
         { name:"Playa de Alcalá Sur", town:"Alcalá", coast:"southwest", type:null, lat:28.2005, lon:-16.8289},
         { name:"Playa del Cabezo N.", town:"El Médano", coast:"east", type:"surf", lat:28.0485, lon:-16.5305},
         { name:"Playa Montaña Roja S.", town:"El Médano", coast:"east", type:null, lat:28.0345, lon:-16.5495},
         { name:"Playa La Mareta Sur", town:"El Médano", coast:"east", type:null, lat:28.0305, lon:-16.5725},
-        { name:"Playa Galletas Sur", town:"Las Galletas", coast:"south", type:"family", lat:28.0065, lon:-16.6670},
+        { name:"Playa Galletas Sur", town:"Las Galletas", coast:"south", type:null, lat:28.0065, lon:-16.6670},
         { name:"Playa Ballena Sur", town:"Las Galletas", coast:"south", type:null, lat:28.0068, lon:-16.6665},
         { name:"Playa Amarilla N.", town:"Las Galletas", coast:"south", type:null, lat:28.0087, lon:-16.6485},
         { name:"Playa Abrigos Sur", town:"Los Abrigos", coast:"south", type:null, lat:28.0275, lon:-16.5925},
         { name:"Playa Grande Norte", town:"El Porís", coast:"east", type:null, lat:28.1610, lon:-16.4250},
-        { name:"Playa Teresitas Este", town:"San Andrés", coast:"north", type:"family", lat:28.5105, lon:-16.1845},
+        { name:"Playa Teresitas Este", town:"San Andrés", coast:"north", type:null, lat:28.5105, lon:-16.1845},
         { name:"Playa Gaviotas Norte", town:"San Andrés", coast:"north", type:null, lat:28.5155, lon:-16.1695},
         { name:"Playa Antequera Sur", town:"Anaga", coast:"north", type:null, lat:28.5455, lon:-16.1275},
         { name:"Playa Almáciga Norte", town:"Taganana", coast:"north", type:"surf", lat:28.5715, lon:-16.2015},
         { name:"Playa Roque Bodegas N.", town:"Taganana", coast:"north", type:"surf", lat:28.5685, lon:-16.2125},
-        { name:"Playa Valleseco N.", town:"San Andrés", coast:"north", type:"family", lat:28.4845, lon:-16.2245},
+        { name:"Playa Valleseco N.", town:"San Andrés", coast:"north", type:null, lat:28.4845, lon:-16.2245},
         { name:"Playa Jardín Sur", town:"Puerto Cruz", coast:"north", type:"surf", lat:28.4175, lon:-16.5580},
         { name:"Playa Martiánez Sur", town:"Puerto Cruz", coast:"north", type:"surf", lat:28.4195, lon:-16.5388},
         { name:"Playa Castillo Sur", town:"Puerto Cruz", coast:"north", type:null, lat:28.4190, lon:-16.5545},
@@ -253,7 +252,7 @@
         { name:"Playa de los Patos E.", town:"La Orotava", coast:"north", type:"surf", lat:28.4255, lon:-16.5085},
         { name:"Playa El Ancón Norte", town:"La Guancha", coast:"north", type:null, lat:28.4265, lon:-16.4990},
         { name:"Playa El Socorro N.", town:"Los Realejos", coast:"north", type:"surf", lat:28.3945, lon:-16.6045},
-        { name:"Playa San Marcos Sur", town:"Icod", coast:"north", type:"family", lat:28.3760, lon:-16.7145},
+        { name:"Playa San Marcos Sur", town:"Icod", coast:"north", type:null, lat:28.3760, lon:-16.7145},
         { name:"Playa Agua Dulce Sur", town:"Icod", coast:"north", type:null, lat:28.3795, lon:-16.7735},
         { name:"Playa Garachico Sur", town:"Garachico", coast:"north", type:null, lat:28.3745, lon:-16.7655},
         { name:"Playa Caleta Sur", town:"Garachico", coast:"northwest", type:null, lat:28.3778, lon:-16.7885}
@@ -275,7 +274,7 @@
                 const lons = chunk.map(b => b.lon).join(',');
 
                 const wUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,cloud_cover,wind_speed_10m`;
-                const mUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lats}&longitude=${lons}&current=wave_height`;
+                const mUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lats}&longitude=${lons}&current=wave_height,swell_wave_direction`;
 
                 const [wRes, mRes] = await Promise.all([fetch(wUrl), fetch(mUrl)]);
                 const wJson = await wRes.json();
@@ -301,6 +300,7 @@
         const wind = w.current.wind_speed_10m;
         const cloud = w.current.cloud_cover;
         const wave = m.current.wave_height || 0;
+        const swellDir = m.current.swell_wave_direction || 0;
 
         let score = 5;
         if (temp > 23) score += 2;
@@ -314,7 +314,7 @@
         else if (wave > (waveDanger - 0.5)) status = 'yellow';
         if (status === 'red') score -= 4;
 
-        return { ...beach, temp, wind, cloud, wave, score: Math.max(0, score), status };
+        return { ...beach, temp, wind, cloud, wave, swellDir, score: Math.max(0, score), status };
     }
 
     function setLanguage(lang) {
@@ -333,14 +333,22 @@
         render();
     }
 
+    function getCardinal(angle) {
+        const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        return directions[Math.round(angle / 45) % 8];
+    }
+
     function render() {
         const grid = document.getElementById('app');
         grid.innerHTML = '';
         
         const filtered = beachData.filter(b => {
             if (currentFilter === 'all') return true;
-            if (currentFilter === 'surfing') return b.type === 'surf' && b.wave > 0.8;
-            if (currentFilter === 'family') return b.type === 'family' && b.wave < 0.6 && b.wind < 20;
+            if (currentFilter === 'surfing') {
+                // Surf Logic: Tagged as surf, waves > 0.8, and wind isn't blowing out (except Médano)
+                const windOk = b.name.includes("Médano") ? true : b.wind < 24;
+                return b.type === 'surf' && b.wave > 0.7 && windOk;
+            }
             return b.coast === currentFilter;
         }).sort((a,b) => b.score - a.score);
 
@@ -377,9 +385,11 @@
                             <span class="metric-value">${Math.round(b.wind)}k</span>
                         </div>
                         <div class="metric-item">
-                            <span class="metric-emoji">☁️</span>
-                            <span class="metric-label">${i18n[currentLang].clouds}</span>
-                            <span class="metric-value">${b.cloud}%</span>
+                            <span class="metric-emoji">
+                                <span class="swell-arrow" style="transform: rotate(${b.swellDir}deg)">↓</span>
+                            </span>
+                            <span class="metric-label">${i18n[currentLang].swell}</span>
+                            <span class="metric-value">${getCardinal(b.swellDir)}</span>
                         </div>
                         <div class="metric-item">
                             <span class="metric-emoji">${icons.wave}</span>
@@ -410,7 +420,6 @@
         beachData.filter(b => {
             if (currentFilter === 'all') return true;
             if (currentFilter === 'surfing') return b.type === 'surf' && b.wave > 0.8;
-            if (currentFilter === 'family') return b.type === 'family' && b.wave < 0.6;
             return b.coast === currentFilter;
         }).forEach(b => {
             const color = b.status === 'green' ? '#2ecc71' : (b.status === 'yellow' ? '#f1c40f' : '#e74c3c');
