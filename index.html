@@ -29,6 +29,7 @@
         header { text-align: center; margin-bottom: 20px; }
         h1 { margin: 0; font-size: 2rem; color: #2c3e50; }
         
+        /* Language Switcher */
         .lang-switcher { margin: 15px 0; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
         .lang-btn {
             background: white; border: 1px solid #ddd; padding: 0; border-radius: 50%;
@@ -74,7 +75,6 @@
         .card:hover { transform: translateY(-3px); }
         
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        
         .beach-name-link { text-decoration: none; color: inherit; flex-grow: 1; display: block; }
         .beach-name { font-size: 1.1rem; font-weight: 700; margin: 0; color: #2c3e50; transition: color 0.2s; }
         .beach-name:hover { color: #3498db; text-decoration: underline; }
@@ -149,6 +149,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
+    // --- Translations ---
     const i18n = {
         en: { title: "Tenerife Beach Rank", sub: "Live ranking based on Weather, Wind & Waves", temp: "Temp", wind: "Wind", clouds: "Clouds", waves: "Waves", update: "Last Update", mapHint: "Click name for Google Maps", btnMap: "🗺️ Open Map View", btnBack: "⬅️ Back to List" },
         es: { title: "Ranking Playas Tenerife", sub: "Clasificación en vivo por clima, viento y olas", temp: "Temp", wind: "Viento", clouds: "Nubes", waves: "Olas", update: "Última act.", mapHint: "Clic nombre para Google Maps", btnMap: "🗺️ Ver Mapa", btnBack: "⬅️ Volver a Lista" },
@@ -159,6 +160,7 @@
         pt: { title: "Ranking Praias Tenerife", sub: "Ranking ao vivo baseado no clima e ondas", temp: "Temp", wind: "Vento", clouds: "Nuvens", waves: "Ondas", update: "Última atualiz.", mapHint: "Clique para Google Maps", btnMap: "🗺️ Abrir Mapa", btnBack: "⬅️ Voltar à Lista" }
     };
 
+    // --- Beach List (100+ items) ---
     const beaches = [
         { name:"Playa de Las Vistas", town:"Los Cristianos", coast:"south", lat:28.0518, lon:-16.7265 },
         { name:"Playa de Los Cristianos", town:"Los Cristianos", coast:"south", lat:28.0504, lon:-16.7226 },
@@ -272,45 +274,53 @@
     let map = null;
     let markers = [];
 
+    // --- Optimized Fetch with Chunking ---
     async function fetchWeatherData() {
         try {
-            // OPTIMIZATION: BATCH REQUESTS
-            // Instead of 100+ separate calls, we send all coordinates in ONE string.
-            const lats = beaches.map(b => b.lat).join(',');
-            const lons = beaches.map(b => b.lon).join(',');
+            const chunkSize = 50; // Splitting into groups of 50 to avoid URL length errors
+            const beachChunks = [];
+            for (let i = 0; i < beaches.length; i += chunkSize) {
+                beachChunks.push(beaches.slice(i, i + chunkSize));
+            }
 
-            const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,cloud_cover,wind_speed_10m&wind_speed_unit=kmh`;
-            const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lats}&longitude=${lons}&current=wave_height`;
+            const allResults = [];
 
-            const [wRes, mRes] = await Promise.all([fetch(weatherUrl), fetch(marineUrl)]);
-            const wData = await wRes.json();
-            const mData = await mRes.json();
+            // Process each chunk
+            for (const chunk of beachChunks) {
+                const lats = chunk.map(b => b.lat).join(',');
+                const lons = chunk.map(b => b.lon).join(',');
 
-            // Open-Meteo returns an array of objects when multiple lats/lons are provided
-            globalBeachData = beaches.map((beach, index) => {
-                const weather = Array.isArray(wData) ? wData[index] : wData;
-                const marine = Array.isArray(mData) ? mData[index] : mData;
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,cloud_cover,wind_speed_10m&wind_speed_unit=kmh`;
+                const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lats}&longitude=${lons}&current=wave_height`;
 
-                const rawData = {
-                    name: beach.name,
-                    town: beach.town,
-                    coast: beach.coast,
-                    lat: beach.lat,
-                    lon: beach.lon,
-                    temp: weather.current.temperature_2m,
-                    wind: weather.current.wind_speed_10m,
-                    clouds: weather.current.cloud_cover,
-                    wave: marine.current.wave_height || 0
-                };
-                return calculateScore(rawData);
-            });
+                const [wRes, mRes] = await Promise.all([fetch(weatherUrl), fetch(marineUrl)]);
+                const wData = await wRes.json();
+                const mData = await mRes.json();
 
+                // Open-Meteo returns an array if multiple coords are sent
+                const wResults = Array.isArray(wData) ? wData : [wData];
+                const mResults = Array.isArray(mData) ? mData : [mData];
+
+                chunk.forEach((beach, index) => {
+                    const beachData = {
+                        ...beach,
+                        temp: wResults[index].current.temperature_2m,
+                        wind: wResults[index].current.wind_speed_10m,
+                        clouds: wResults[index].current.cloud_cover,
+                        wave: mResults[index].current.wave_height || 0
+                    };
+                    allResults.push(calculateScore(beachData));
+                });
+            }
+
+            globalBeachData = allResults;
             renderBeaches();
             if(map) updateMapMarkers();
             updateTimestamp();
+
         } catch (e) {
-            console.error("API Error:", e);
-            document.getElementById('app').innerHTML = '<div class="loading">Error loading data. Please refresh later.</div>';
+            console.error("Fetch failed:", e);
+            document.getElementById('app').innerHTML = '<div class="loading">Error loading data. Please refresh.</div>';
         }
     }
 
@@ -343,6 +353,7 @@
         let waveEmoji = '🟢';
         if (beach.wave > beach.waveLimits.red) waveEmoji = '🔴';
         else if (beach.wave > beach.waveLimits.yellow) waveEmoji = '🟡';
+
         return {
             temp: beach.temp > 28 ? '🔥' : (beach.temp > 20 ? '☀️' : '🌥️'),
             wind: beach.wind > 22 ? '🚩' : (beach.wind > 12 ? '🍃' : '💨'),
@@ -356,8 +367,12 @@
         const data = i18n[lang];
         document.getElementById('title-text').textContent = data.title;
         document.getElementById('subtitle-text').textContent = data.sub;
-        document.querySelector('button[onclick="showMap()"]').textContent = data.btnMap;
-        document.querySelector('button[onclick="showList()"]').textContent = data.btnBack;
+        
+        const mapBtn = document.querySelector('button[onclick="showMap()"]');
+        const backBtn = document.querySelector('button[onclick="showList()"]');
+        if(mapBtn) mapBtn.textContent = data.btnMap;
+        if(backBtn) backBtn.textContent = data.btnBack;
+        
         document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`btn-${lang}`).classList.add('active');
         renderBeaches();
@@ -378,6 +393,7 @@
         globalBeachData.sort((a, b) => b.score - a.score).forEach(beach => {
             const icons = getEmojis(beach);
             const mapsUrl = `https://www.google.com/maps?q=${beach.lat},${beach.lon}`;
+
             app.innerHTML += `
                 <div class="card status-${beach.status}">
                     <div class="card-header">
@@ -389,12 +405,29 @@
                         <div class="score-badge">${beach.score}/10</div>
                     </div>
                     <div class="metrics">
-                        <div class="metric-item"><span class="metric-emoji">${icons.temp}</span><span class="metric-label">${langData.temp}</span><span class="metric-value">${beach.temp}°C</span></div>
-                        <div class="metric-item"><span class="metric-emoji">${icons.wind}</span><span class="metric-label">${langData.wind}</span><span class="metric-value">${beach.wind} <small>km/h</small></span></div>
-                        <div class="metric-item"><span class="metric-emoji">${icons.clouds}</span><span class="metric-label">${langData.clouds}</span><span class="metric-value">${beach.clouds}%</span></div>
-                        <div class="metric-item"><span class="metric-emoji">${icons.waves}</span><span class="metric-label">${langData.waves}</span><span class="metric-value">${beach.wave}m</span></div>
+                        <div class="metric-item">
+                            <span class="metric-emoji">${icons.temp}</span>
+                            <span class="metric-label">${langData.temp}</span>
+                            <span class="metric-value">${beach.temp}°C</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-emoji">${icons.wind}</span>
+                            <span class="metric-label">${langData.wind}</span>
+                            <span class="metric-value">${beach.wind} <small>km/h</small></span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-emoji">${icons.clouds}</span>
+                            <span class="metric-label">${langData.clouds}</span>
+                            <span class="metric-value">${beach.clouds}%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-emoji">${icons.waves}</span>
+                            <span class="metric-label">${langData.waves}</span>
+                            <span class="metric-value">${beach.wave}m</span>
+                        </div>
                     </div>
-                </div>`;
+                </div>
+            `;
         });
     }
 
@@ -412,7 +445,9 @@
 
     function initMap() {
         map = L.map('map-container').setView([28.2916, -16.6291], 10);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
         updateMapMarkers();
     }
 
@@ -420,14 +455,22 @@
         if (!map || globalBeachData.length === 0) return;
         markers.forEach(marker => map.removeLayer(marker));
         markers = [];
+
         globalBeachData.forEach(beach => {
-            let color = beach.status === 'green' ? '#2ecc71' : (beach.status === 'yellow' ? '#f1c40f' : '#e74c3c');
-            const marker = L.circleMarker([beach.lat, beach.lon], { radius: 8, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8 }).addTo(map);
+            let color = '#2ecc71';
+            if (beach.status === 'yellow') color = '#f1c40f';
+            if (beach.status === 'red') color = '#e74c3c';
+
+            const marker = L.circleMarker([beach.lat, beach.lon], {
+                radius: 8, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8
+            }).addTo(map);
+
             marker.bindPopup(`<b>${beach.name}</b><br>Score: ${beach.score}/10<br>Waves: ${beach.wave}m`);
             markers.push(marker);
         });
     }
 
+    // Start everything
     fetchWeatherData();
 </script>
 </body>
