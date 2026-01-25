@@ -97,3 +97,90 @@ const beaches = [
 {name:"Playa de la Tejita",town:"El Médano",lat:28.0333,lon:-16.5593,coast:"east"},
 {name:"Playa del Cabezo",town:"El Médano",lat:28.0478,lon:-16.5302,coast:"east"},
 {name:"Playa de la Pelada",town:"El Médano",lat:28.0573,lon:-16.5204,coast:"east"},
+{name:"Playa de Montaña Roja",town:"El Médano",lat:28.0333,lon:-16.5492,coast:"east"},
+
+
+// NORTH
+{name:"Playa Jardín",town:"Puerto de la Cruz",lat:28.4168,lon:-16.5574,coast:"north"},
+{name:"Playa Martiánez",town:"Puerto de la Cruz",lat:28.4189,lon:-16.5383,coast:"north"},
+{name:"Playa del Bollullo",town:"La Orotava",lat:28.4217,lon:-16.5165,coast:"north"},
+{name:"Playa de los Patos",town:"La Orotava",lat:28.4239,lon:-16.5076,coast:"north"},
+{name:"Playa de San Marcos",town:"Icod de los Vinos",lat:28.3753,lon:-16.7138,coast:"north"},
+{name:"Charco del Viento",town:"La Guancha",lat:28.3724,lon:-16.7022,coast:"north"},
+{name:"Playa de Garachico",town:"Garachico",lat:28.3736,lon:-16.7644,coast:"north"},
+{name:"Playa de Benijo",town:"Taganana",lat:28.5724,lon:-16.1867,coast:"north"},
+{name:"Playa de Almáciga",town:"Taganana",lat:28.5702,lon:-16.2005,coast:"north"},
+{name:"Playa del Roque de las Bodegas",town:"Taganana",lat:28.5673,lon:-16.2114,coast:"north"},
+{name:"Playa de Las Teresitas",town:"Santa Cruz",lat:28.5096,lon:-16.1837,coast:"north"},
+{name:"Playa de Las Gaviotas",town:"Santa Cruz",lat:28.5147,lon:-16.1687,coast:"north"},
+{name:"Playa de Antequera",town:"Anaga",lat:28.5447,lon:-16.1264,coast:"north"},
+
+
+// NATURAL POOLS / EXTRA
+{name:"Bajamar Pools",town:"Bajamar",lat:28.5562,lon:-16.3475,coast:"north"},
+{name:"Punta del Hidalgo",town:"Punta del Hidalgo",lat:28.5694,lon:-16.3276,coast:"north"}
+];
+
+
+function scoreBeach(wind,temp,clouds,waves,coast){
+let score=0;
+if(temp>=22&&temp<=30)score+=4; else if(temp>=18)score+=2;
+if(wind<=18)score+=3; else if(wind<=25)score+=2; else if(wind<=32)score+=1;
+if(clouds<=20)score+=3; else if(clouds<=50)score+=2; else if(clouds<=70)score+=1;
+if(waves>2.0)return 0;
+if(waves>1.5)score-=(coast==="north"?1:3);
+else if(waves>1.2)score-=(coast==="north"?0.5:2);
+return Math.max(0,Math.min(10,score));
+}
+
+
+function statusColor(score){ if(score>=8)return"green"; if(score>=6)return"yellow"; return"red"; }
+
+
+function renderList(){
+const list=document.getElementById("listView"); list.innerHTML="";
+beaches.forEach(b=>{
+const score=scoreBeach(15,25,20,1.1,b.coast);
+const color=statusColor(score);
+const maps=`https://www.google.com/maps?q=${b.lat},${b.lon}`;
+list.innerHTML+=`
+<div class="card ${color}">
+<h3 class="beach-name"><a href="${maps}" target="_blank">${b.name}</a></h3>
+<div class="beach-town">${b.town}</div>
+<div class="beach-map-hint">Click beach to open Google Maps</div>
+<div class="metrics">
+<span>🌡️ 25°C</span>
+<span>🌬️ 15 km/h</span>
+<span>☁️ 20%</span>
+<span>🌊 1.1m</span>
+</div>
+</div>`;
+});
+}
+
+
+function renderMap(){
+const map=document.getElementById("mapView"); map.innerHTML="";
+beaches.forEach(b=>{
+const score=scoreBeach(15,25,20,1.1,b.coast);
+const color=statusColor(score);
+const x=(b.lon+17)*400; const y=(28.7-b.lat)*400;
+map.innerHTML+=`<div class="marker ${color}" style="left:${x}px;top:${y}px"></div>`;
+});
+}
+
+
+document.getElementById("toggleMap").onclick=()=>{
+listView.hidden=true; mapView.hidden=false;
+toggleMap.hidden=true; backBtn.hidden=false; renderMap();
+};
+document.getElementById("backBtn").onclick=()=>{
+listView.hidden=false; mapView.hidden=true;
+toggleMap.hidden=false; backBtn.hidden=true;
+};
+
+
+renderList();
+</script>
+</body>
+</html>
