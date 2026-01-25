@@ -84,7 +84,7 @@
         .metric-label { font-size: 0.5rem; color: #777; font-weight: bold; text-transform: uppercase; }
         .metric-value { font-weight: 600; font-size: 0.8rem; }
         .metric-emoji { font-size: 1.1rem; margin-bottom: 2px; }
-        .swell-arrow { display: inline-block; font-size: 1rem; line-height: 1; }
+        .swell-arrow { display: inline-block; font-size: 1rem; line-height: 1; transition: transform 0.3s; }
 
         .status-green { border-color: var(--green); }
         .status-yellow { border-color: var(--yellow); }
@@ -135,7 +135,7 @@
 </div>
 
 <footer class="main-footer">
-    © 2026 Tenerife Beach Rank License: CC BY-NC 4.0. Data: Open-Meteo & Marine API.
+    © 2026 Tenerife Beach Rank. Data: Open-Meteo & Marine API.
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -345,7 +345,6 @@
         const filtered = beachData.filter(b => {
             if (currentFilter === 'all') return true;
             if (currentFilter === 'surfing') {
-                // Surf Logic: Tagged as surf, waves > 0.8, and wind isn't blowing out (except Médano)
                 const windOk = b.name.includes("Médano") ? true : b.wind < 24;
                 return b.type === 'surf' && b.wave > 0.7 && windOk;
             }
@@ -363,6 +362,12 @@
                 wind: b.wind > 20 ? '🚩' : '💨',
                 wave: b.status === 'red' ? '⚠️' : (b.status === 'yellow' ? '🟡' : '🟢')
             };
+
+            // Dynamic logic: Show swell only if 'surfing' filter is selected, else show clouds
+            const showSwell = currentFilter === 'surfing';
+            const dynamicEmoji = showSwell ? `<span class="swell-arrow" style="transform: rotate(${b.swellDir}deg)">↓</span>` : '☁️';
+            const dynamicLabel = showSwell ? i18n[currentLang].swell : i18n[currentLang].clouds;
+            const dynamicValue = showSwell ? getCardinal(b.swellDir) : `${b.cloud}%`;
 
             grid.innerHTML += `
                 <div class="card status-${b.status}">
@@ -385,11 +390,9 @@
                             <span class="metric-value">${Math.round(b.wind)}k</span>
                         </div>
                         <div class="metric-item">
-                            <span class="metric-emoji">
-                                <span class="swell-arrow" style="transform: rotate(${b.swellDir}deg)">↓</span>
-                            </span>
-                            <span class="metric-label">${i18n[currentLang].swell}</span>
-                            <span class="metric-value">${getCardinal(b.swellDir)}</span>
+                            <span class="metric-emoji">${dynamicEmoji}</span>
+                            <span class="metric-label">${dynamicLabel}</span>
+                            <span class="metric-value">${dynamicValue}</span>
                         </div>
                         <div class="metric-item">
                             <span class="metric-emoji">${icons.wave}</span>
