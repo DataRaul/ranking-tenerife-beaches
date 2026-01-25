@@ -29,15 +29,16 @@
         header { text-align: center; margin-bottom: 20px; }
         h1 { margin: 0; font-size: 2rem; color: #2c3e50; }
         
-        /* Language Switcher */
+        /* Language Switcher with Flags */
         .lang-switcher { margin: 15px 0; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
         .lang-btn {
-            background: white; border: 1px solid #ddd; padding: 10px; border-radius: 50%;
-            cursor: pointer; font-size: 1.5rem; transition: all 0.2s ease; line-height: 1;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
+            background: white; border: 1px solid #ddd; padding: 0; border-radius: 50%;
+            cursor: pointer; font-size: 1.8rem; transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 48px; height: 48px;
+            display: flex; align-items: center; justify-content: center; line-height: 1;
         }
-        .lang-btn:hover { transform: scale(1.1); border-color: #3498db; }
-        .lang-btn.active { border-color: #3498db; background: #ebf5ff; transform: scale(1.1); }
+        .lang-btn:hover { transform: scale(1.15); border-color: #3498db; }
+        .lang-btn.active { border-color: #3498db; background: #ebf5ff; transform: scale(1.1); box-shadow: 0 0 8px rgba(52, 152, 219, 0.4); }
 
         /* Navigation Buttons */
         .nav-btn {
@@ -122,6 +123,7 @@
 
 <header>
     <h1 id="title-text">Tenerife Beach Rank</h1>
+    
     <div class="lang-switcher">
         <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">🇬🇧</button>
         <button class="lang-btn" id="btn-es" onclick="setLanguage('es')">🇪🇸</button>
@@ -280,8 +282,8 @@
         else score += 1;
 
         // WIND RELAXED LOGIC (Less punished)
-        if (beach.wind < 20) score += 3;       // Was 15
-        else if (beach.wind < 30) score += 1.5; // Was 25
+        if (beach.wind < 20) score += 3;
+        else if (beach.wind < 30) score += 1.5;
 
         if (beach.clouds < 20) score += 3;
         else if (beach.clouds < 50) score += 1.5;
@@ -290,7 +292,6 @@
         let status = score >= 8 ? 'green' : (score >= 6 ? 'yellow' : 'red');
 
         // SEA SAFETY BYPASS (Adjusted for North Coast)
-        // North coast is naturally rougher, so we allow higher waves before "Red"
         const isNorth = beach.coast === 'north' || beach.coast === 'northwest';
         
         const redLimit = isNorth ? 2.5 : 2.0;
@@ -342,7 +343,7 @@
 
         globalBeachData.sort((a, b) => b.score - a.score).forEach(beach => {
             const icons = getEmojis(beach);
-            // Valid Google Maps Search Link
+            // Google Maps Link (Universal format)
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${beach.lat},${beach.lon}`;
 
             app.innerHTML += `
@@ -388,7 +389,7 @@
         document.getElementById('map-view').classList.add('active-view');
         
         if (!map) initMap();
-        else setTimeout(() => { map.invalidateSize(); }, 100); // Fix rendering when appearing
+        else setTimeout(() => { map.invalidateSize(); }, 100); 
     }
 
     function showList() {
