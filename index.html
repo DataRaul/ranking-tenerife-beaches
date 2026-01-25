@@ -32,28 +32,31 @@
         /* Language Switcher */
         .lang-switcher { margin: 15px 0; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
         .lang-btn {
-            background: white; border: 1px solid #ddd; padding: 8px; border-radius: 50%;
-            cursor: pointer; font-size: 1.4rem; transition: all 0.2s ease; line-height: 1;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: white; border: 1px solid #ddd; padding: 10px; border-radius: 50%;
+            cursor: pointer; font-size: 1.5rem; transition: all 0.2s ease; line-height: 1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
         }
-        .lang-btn:hover { transform: scale(1.2); border-color: #3498db; }
-        .lang-btn.active { border-color: #3498db; background: #ebf5ff; }
+        .lang-btn:hover { transform: scale(1.1); border-color: #3498db; }
+        .lang-btn.active { border-color: #3498db; background: #ebf5ff; transform: scale(1.1); }
 
-        /* Map Toggle Button */
-        .map-toggle-btn {
-            background-color: #3498db; color: white; border: none; padding: 10px 20px;
-            border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background 0.2s;
+        /* Navigation Buttons */
+        .nav-btn {
+            background-color: #3498db; color: white; border: none; padding: 12px 24px;
+            border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background 0.2s; font-size: 1rem;
         }
-        .map-toggle-btn:hover { background-color: #2980b9; }
+        .nav-btn:hover { background-color: #2980b9; }
+        .nav-btn.secondary { background-color: #7f8c8d; }
 
-        /* The Map Container */
+        /* View Containers */
+        #list-view, #map-view { display: none; }
+        .active-view { display: block !important; }
+
+        /* Map Styling */
         #map-container {
-            height: 400px; width: 100%; max-width: 1400px; margin: 20px auto;
-            border-radius: 12px; border: 2px solid #ddd; display: none; /* Hidden by default */
-            z-index: 1;
+            height: 75vh; width: 100%; border-radius: 12px; border: 2px solid #ddd;
+            margin-top: 20px;
         }
-        #map-container.visible { display: block; }
 
         .subtitle { color: var(--text-light); font-size: 0.9rem; margin-top: 5px; }
         .last-updated { font-size: 0.8rem; color: #888; margin-top: 10px; font-weight: bold; }
@@ -78,12 +81,12 @@
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
         
         /* Beach Name Link Styling */
-        .beach-name-link { text-decoration: none; color: inherit; flex-grow: 1; }
+        .beach-name-link { text-decoration: none; color: inherit; flex-grow: 1; display: block; }
         .beach-name { font-size: 1.1rem; font-weight: 700; margin: 0; color: #2c3e50; transition: color 0.2s; }
         .beach-name:hover { color: #3498db; text-decoration: underline; }
         
         .town-name { font-size: 0.85rem; color: #7f8c8d; margin-top: 2px; font-weight: 500; }
-        .click-hint { font-size: 0.7rem; color: #3498db; margin-top: 2px; display: block; }
+        .click-hint { font-size: 0.7rem; color: #3498db; margin-top: 2px; display: block; font-weight: normal; }
 
         .score-badge { background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold; margin-left: 10px; white-space: nowrap; }
 
@@ -129,15 +132,24 @@
         <button class="lang-btn" id="btn-pt" onclick="setLanguage('pt')">🇵🇹</button>
     </div>
     
-    <button class="map-toggle-btn" onclick="toggleMap()">🗺️ Map View / Mapa</button>
     <div id="subtitle-text" class="subtitle">Live ranking: Weather, Wind & Wave Safety</div>
     <div id="last-update" class="last-updated">...</div>
 </header>
 
-<div id="map-container"></div>
+<div id="list-view" class="active-view">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <button class="nav-btn" onclick="showMap()">🗺️ Open Map View</button>
+    </div>
+    <div id="app" class="beach-grid">
+        <div class="loading">Loading live data from Tenerife...</div>
+    </div>
+</div>
 
-<div id="app" class="beach-grid">
-    <div class="loading">Loading live data from Tenerife...</div>
+<div id="map-view">
+    <div style="text-align: center;">
+        <button class="nav-btn secondary" onclick="showList()">⬅️ Back to List</button>
+    </div>
+    <div id="map-container"></div>
 </div>
 
 <footer class="main-footer">
@@ -148,16 +160,15 @@
 
 <script>
     const i18n = {
-        en: { title: "Tenerife Beach Rank", sub: "Live ranking based on Weather, Wind & Waves", temp: "Temp", wind: "Wind", clouds: "Clouds", waves: "Waves", update: "Last Update", mapHint: "Click name for map" },
-        es: { title: "Ranking Playas Tenerife", sub: "Clasificación en vivo por clima, viento y olas", temp: "Temp", wind: "Viento", clouds: "Nubes", waves: "Olas", update: "Última act.", mapHint: "Clic nombre para mapa" },
-        de: { title: "Teneriffa Strand-Ranking", sub: "Live-Ranking nach Wetter, Wind & Wellen", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Wellen", update: "Letztes Update", mapHint: "Klicken für Karte" },
-        fr: { title: "Classement Plages Ténérife", sub: "Classement en direct (Météo, Vent, Vagues)", temp: "Temp", wind: "Vent", clouds: "Nuages", waves: "Vagues", update: "Mis à jour", mapHint: "Cliquez pour la carte" },
-        ru: { title: "Рейтинг пляжей Тенерифе", sub: "Живой рейтинг: погода, ветер и волны", temp: "Темп.", wind: "Ветер", clouds: "Облака", waves: "Волны", update: "Обновлено", mapHint: "Клик для карты" },
-        nl: { title: "Tenerife Strand Ranglijst", sub: "Live ranglijst op basis van weer en golven", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Golven", update: "Laatste update", mapHint: "Klik voor kaart" },
-        pt: { title: "Ranking Praias Tenerife", sub: "Ranking ao vivo baseado no clima e ondas", temp: "Temp", wind: "Vento", clouds: "Nuvens", waves: "Ondas", update: "Última atualiz.", mapHint: "Clique para mapa" }
+        en: { title: "Tenerife Beach Rank", sub: "Live ranking based on Weather, Wind & Waves", temp: "Temp", wind: "Wind", clouds: "Clouds", waves: "Waves", update: "Last Update", mapHint: "Click name for Google Maps", btnMap: "🗺️ Open Map View", btnBack: "⬅️ Back to List" },
+        es: { title: "Ranking Playas Tenerife", sub: "Clasificación en vivo por clima, viento y olas", temp: "Temp", wind: "Viento", clouds: "Nubes", waves: "Olas", update: "Última act.", mapHint: "Clic nombre para Google Maps", btnMap: "🗺️ Ver Mapa", btnBack: "⬅️ Volver a Lista" },
+        de: { title: "Teneriffa Strand-Ranking", sub: "Live-Ranking nach Wetter, Wind & Wellen", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Wellen", update: "Letztes Update", mapHint: "Klicken für Google Maps", btnMap: "🗺️ Karte öffnen", btnBack: "⬅️ Zurück zur Liste" },
+        fr: { title: "Classement Plages Ténérife", sub: "Classement en direct (Météo, Vent, Vagues)", temp: "Temp", wind: "Vent", clouds: "Nuages", waves: "Vagues", update: "Mis à jour", mapHint: "Cliquez pour Google Maps", btnMap: "🗺️ Voir la Carte", btnBack: "⬅️ Retour à la liste" },
+        ru: { title: "Рейтинг пляжей Тенерифе", sub: "Живой рейтинг: погода, ветер и волны", temp: "Темп.", wind: "Ветер", clouds: "Облака", waves: "Волны", update: "Обновлено", mapHint: "Клик для Google Maps", btnMap: "🗺️ Открыть карту", btnBack: "⬅️ Назад к списку" },
+        nl: { title: "Tenerife Strand Ranglijst", sub: "Live ranglijst op basis van weer en golven", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Golven", update: "Laatste update", mapHint: "Klik voor Google Maps", btnMap: "🗺️ Kaart openen", btnBack: "⬅️ Terug naar lijst" },
+        pt: { title: "Ranking Praias Tenerife", sub: "Ranking ao vivo baseado no clima e ondas", temp: "Temp", wind: "Vento", clouds: "Nuvens", waves: "Ondas", update: "Última atualiz.", mapHint: "Clique para Google Maps", btnMap: "🗺️ Abrir Mapa", btnBack: "⬅️ Voltar à Lista" }
     };
 
-    // Updated Beach List
     const beaches = [
         { name:"Playa de Las Vistas", town:"Los Cristianos", coast:"south", lat:28.0518, lon:-16.7265 },
         { name:"Playa de Los Cristianos", town:"Los Cristianos", coast:"south", lat:28.0504, lon:-16.7226 },
@@ -244,6 +255,7 @@
                 return {
                     name: beach.name,
                     town: beach.town,
+                    coast: beach.coast, // Needed for scoring logic
                     lat: beach.lat,
                     lon: beach.lon,
                     temp: wData.current.temperature_2m,
@@ -257,7 +269,7 @@
         const results = await Promise.all(promises);
         globalBeachData = results.filter(r => r !== null).map(calculateScore);
         renderBeaches();
-        if(map) updateMapMarkers(); // Update map if it's already open
+        if(map) updateMapMarkers();
         updateTimestamp();
     }
 
@@ -267,8 +279,9 @@
         else if (beach.temp >= 19 && beach.temp < 22) score += 2;
         else score += 1;
 
-        if (beach.wind < 15) score += 3;
-        else if (beach.wind < 25) score += 1.5;
+        // WIND RELAXED LOGIC (Less punished)
+        if (beach.wind < 20) score += 3;       // Was 15
+        else if (beach.wind < 30) score += 1.5; // Was 25
 
         if (beach.clouds < 20) score += 3;
         else if (beach.clouds < 50) score += 1.5;
@@ -276,17 +289,23 @@
         score = Math.round(score);
         let status = score >= 8 ? 'green' : (score >= 6 ? 'yellow' : 'red');
 
-        // SEA SAFETY BYPASS
-        if (beach.wave > 2.0) status = 'red';
-        else if (beach.wave > 1.2 && status === 'green') status = 'yellow';
+        // SEA SAFETY BYPASS (Adjusted for North Coast)
+        // North coast is naturally rougher, so we allow higher waves before "Red"
+        const isNorth = beach.coast === 'north' || beach.coast === 'northwest';
+        
+        const redLimit = isNorth ? 2.5 : 2.0;
+        const yellowLimit = isNorth ? 1.5 : 1.2;
 
-        return { ...beach, score, status };
+        if (beach.wave > redLimit) status = 'red';
+        else if (beach.wave > yellowLimit && status === 'green') status = 'yellow';
+
+        return { ...beach, score, status, waveLimits: { yellow: yellowLimit, red: redLimit } };
     }
 
     function getEmojis(beach) {
         let waveEmoji = '🟢';
-        if (beach.wave > 2.0) waveEmoji = '🔴';
-        else if (beach.wave > 1.2) waveEmoji = '🟡';
+        if (beach.wave > beach.waveLimits.red) waveEmoji = '🔴';
+        else if (beach.wave > beach.waveLimits.yellow) waveEmoji = '🟡';
 
         return {
             temp: beach.temp > 28 ? '🔥' : (beach.temp > 20 ? '☀️' : '🌥️'),
@@ -298,8 +317,12 @@
 
     function setLanguage(lang) {
         currentLang = lang;
-        document.getElementById('title-text').textContent = i18n[lang].title;
-        document.getElementById('subtitle-text').textContent = i18n[lang].sub;
+        const data = i18n[lang];
+        document.getElementById('title-text').textContent = data.title;
+        document.getElementById('subtitle-text').textContent = data.sub;
+        document.querySelector('button[onclick="showMap()"]').textContent = data.btnMap;
+        document.querySelector('button[onclick="showList()"]').textContent = data.btnBack;
+        
         document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`btn-${lang}`).classList.add('active');
         renderBeaches();
@@ -319,7 +342,7 @@
 
         globalBeachData.sort((a, b) => b.score - a.score).forEach(beach => {
             const icons = getEmojis(beach);
-            // Google Maps Link
+            // Valid Google Maps Search Link
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${beach.lat},${beach.lon}`;
 
             app.innerHTML += `
@@ -359,51 +382,40 @@
         });
     }
 
-    // --- MAP LOGIC ---
-    function toggleMap() {
-        const mapContainer = document.getElementById('map-container');
-        const isHidden = mapContainer.style.display !== 'block';
+    // --- VIEW SWITCHING LOGIC ---
+    function showMap() {
+        document.getElementById('list-view').classList.remove('active-view');
+        document.getElementById('map-view').classList.add('active-view');
         
-        mapContainer.style.display = isHidden ? 'block' : 'none';
-        
-        if (isHidden) {
-            if (!map) initMap();
-            else map.invalidateSize(); // Fixes Leaflet rendering issues when un-hiding
-        }
+        if (!map) initMap();
+        else setTimeout(() => { map.invalidateSize(); }, 100); // Fix rendering when appearing
+    }
+
+    function showList() {
+        document.getElementById('map-view').classList.remove('active-view');
+        document.getElementById('list-view').classList.add('active-view');
     }
 
     function initMap() {
-        // Initialize Leaflet map centered on Tenerife
         map = L.map('map-container').setView([28.2916, -16.6291], 10);
-        
-        // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
-
         updateMapMarkers();
     }
 
     function updateMapMarkers() {
         if (!map || globalBeachData.length === 0) return;
-
-        // Clear existing markers
         markers.forEach(marker => map.removeLayer(marker));
         markers = [];
 
         globalBeachData.forEach(beach => {
-            // Determine Color based on status
-            let color = '#2ecc71'; // Green
+            let color = '#2ecc71';
             if (beach.status === 'yellow') color = '#f1c40f';
             if (beach.status === 'red') color = '#e74c3c';
 
             const marker = L.circleMarker([beach.lat, beach.lon], {
-                radius: 8,
-                fillColor: color,
-                color: '#fff',
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.8
+                radius: 8, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8
             }).addTo(map);
 
             marker.bindPopup(`<b>${beach.name}</b><br>Score: ${beach.score}/10<br>Waves: ${beach.wave}m`);
