@@ -1,279 +1,417 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tenerife Beach Rank + Safety Flags</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<style>
-:root {
-  --bg-color:#f0f4f8;
-  --card-bg:#ffffff;
-  --text-main:#333;
-  --text-light:#666;
-  --green:#2ecc71;
-  --yellow:#f1c40f;
-  --red:#e74c3c;
-  --footer-bg:#000;
-}
-body {
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  background:var(--bg-color);
-  margin:0;
-  padding:20px;
-  padding-bottom:120px;
-  color:var(--text-main);
-}
-header { text-align:center; margin-bottom:20px }
-h1 { margin:0; font-size:2rem; color:#2c3e50 }
-.subtitle { color:var(--text-light); font-size:.9rem; }
-.last-updated { font-size:.8rem; color:#888; margin-top:8px; font-weight:bold; }
-.lang-switcher { margin:15px 0; display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
-.lang-btn { background:#fff; border:1px solid #ddd; padding:8px; border-radius:50%; cursor:pointer; font-size:1.4rem; box-shadow:0 2px 4px rgba(0,0,0,.1); }
-.lang-btn.active { border-color:#3498db; background:#ebf5ff; }
-.view-toggle { display:flex; justify-content:center; gap:10px; margin:15px 0; }
-.view-toggle button { padding:8px 14px; border-radius:20px; border:1px solid #ccc; background:#fff; cursor:pointer; font-weight:600; }
-#map { height:70vh; max-width:1400px; margin:0 auto; border-radius:12px; display:none; }
-.beach-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:20px; max-width:1400px; margin:0 auto; }
-.card { background:var(--card-bg); border-radius:12px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,.05); border-top:6px solid #ccc; transition: transform 0.2s; }
-.card:hover { transform: translateY(-3px); }
-.status-green { border-color:var(--green); }
-.status-yellow { border-color:var(--yellow); }
-.status-red { border-color:var(--red); }
-.card-header { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-.beach-name a { color:#2c3e50; text-decoration:none; font-weight:700; }
-.beach-town { font-size:.75rem; color:#888; margin-top:2px; }
-.beach-map-hint { font-size:.7rem; color:#aaa; }
-.score-badge { padding:5px 12px; border-radius:20px; font-weight:bold; color:#fff; }
-.status-green .score-badge { background:var(--green); }
-.status-yellow .score-badge { background:var(--yellow); color:#333; }
-.status-red .score-badge { background:var(--red); }
-.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:10px; }
-.metric-item { background:#f8f9fa; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80px; }
-.metric-emoji { font-size:1.2rem; margin-bottom:4px; }
-.metric-label { font-size:.55rem; text-transform:uppercase; color:#777; font-weight:bold; }
-.metric-value { font-size:.85rem; font-weight:600; }
-.main-footer { background:var(--footer-bg); color:#fff; text-align:center; padding:25px 10px; position:fixed; bottom:0; width:100%; font-size:13px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenerife Beach Rank</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-main: #333;
+            --text-light: #666;
+            --green: #2ecc71;
+            --yellow: #f1c40f;
+            --red: #e74c3c;
+            --footer-bg: #000000;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 120px;
+        }
+
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 2rem; color: #2c3e50; }
+        
+        /* Language Switcher */
+        .lang-switcher { margin: 15px 0; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        .lang-btn {
+            background: white; border: 1px solid #ddd; padding: 8px; border-radius: 50%;
+            cursor: pointer; font-size: 1.4rem; transition: all 0.2s ease; line-height: 1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .lang-btn:hover { transform: scale(1.2); border-color: #3498db; }
+        .lang-btn.active { border-color: #3498db; background: #ebf5ff; }
+
+        /* Map Toggle Button */
+        .map-toggle-btn {
+            background-color: #3498db; color: white; border: none; padding: 10px 20px;
+            border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background 0.2s;
+        }
+        .map-toggle-btn:hover { background-color: #2980b9; }
+
+        /* The Map Container */
+        #map-container {
+            height: 400px; width: 100%; max-width: 1400px; margin: 20px auto;
+            border-radius: 12px; border: 2px solid #ddd; display: none; /* Hidden by default */
+            z-index: 1;
+        }
+        #map-container.visible { display: block; }
+
+        .subtitle { color: var(--text-light); font-size: 0.9rem; margin-top: 5px; }
+        .last-updated { font-size: 0.8rem; color: #888; margin-top: 10px; font-weight: bold; }
+
+        /* Grid Layout */
+        .beach-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg); border-radius: 12px; padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s;
+            border-top: 6px solid #ccc;
+        }
+        .card:hover { transform: translateY(-3px); }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        
+        /* Beach Name Link Styling */
+        .beach-name-link { text-decoration: none; color: inherit; flex-grow: 1; }
+        .beach-name { font-size: 1.1rem; font-weight: 700; margin: 0; color: #2c3e50; transition: color 0.2s; }
+        .beach-name:hover { color: #3498db; text-decoration: underline; }
+        
+        .town-name { font-size: 0.85rem; color: #7f8c8d; margin-top: 2px; font-weight: 500; }
+        .click-hint { font-size: 0.7rem; color: #3498db; margin-top: 2px; display: block; }
+
+        .score-badge { background: #333; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold; margin-left: 10px; white-space: nowrap; }
+
+        /* Metrics Grid */
+        .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 15px; }
+        .metric-item {
+            background: #f8f9fa; padding: 8px 2px; border-radius: 8px;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            min-height: 80px; justify-content: center;
+        }
+        .metric-emoji { font-size: 1.2rem; margin-bottom: 4px; }
+        .metric-label { font-size: 0.55rem; color: #777; text-transform: uppercase; font-weight: bold; letter-spacing: 0.3px; }
+        .metric-value { font-weight: 600; font-size: 0.85rem; color: #444; }
+
+        /* Status Colors */
+        .status-green { border-color: var(--green); }
+        .status-green .score-badge { background-color: var(--green); }
+        .status-yellow { border-color: var(--yellow); }
+        .status-yellow .score-badge { background-color: var(--yellow); color: #333; }
+        .status-red { border-color: var(--red); }
+        .status-red .score-badge { background-color: var(--red); }
+
+        .loading { text-align: center; grid-column: 1 / -1; padding: 100px; color: #666; font-style: italic; }
+
+        .main-footer {
+            background-color: var(--footer-bg); color: #ffffff; text-align: center;
+            padding: 25px 10px; position: fixed; bottom: 0; left: 0; width: 100%;
+            font-size: 13px; z-index: 1000;
+        }
+    </style>
 </head>
 <body>
+
 <header>
-<h1 id="title-text">Tenerife Beach Rank</h1>
-<div class="lang-switcher">
-<button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">🇬🇧</button>
-<button class="lang-btn" id="btn-es" onclick="setLanguage('es')">🇪🇸</button>
-<button class="lang-btn" id="btn-de" onclick="setLanguage('de')">🇩🇪</button>
-<button class="lang-btn" id="btn-fr" onclick="setLanguage('fr')">🇫🇷</button>
-<button class="lang-btn" id="btn-ru" onclick="setLanguage('ru')">🇷🇺</button>
-<button class="lang-btn" id="btn-nl" onclick="setLanguage('nl')">🇳🇱</button>
-<button class="lang-btn" id="btn-pt" onclick="setLanguage('pt')">🇵🇹</button>
-</div>
-<div class="subtitle" id="subtitle-text">Live ranking: Weather, Wind & Wave Safety</div>
-<div class="last-updated" id="last-update"></div>
-<div class="view-toggle">
-<button onclick="showList()">📋 List</button>
-<button onclick="showMap()">🗺️ Map</button>
-</div>
+    <h1 id="title-text">Tenerife Beach Rank</h1>
+    <div class="lang-switcher">
+        <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">🇬🇧</button>
+        <button class="lang-btn" id="btn-es" onclick="setLanguage('es')">🇪🇸</button>
+        <button class="lang-btn" id="btn-de" onclick="setLanguage('de')">🇩🇪</button>
+        <button class="lang-btn" id="btn-fr" onclick="setLanguage('fr')">🇫🇷</button>
+        <button class="lang-btn" id="btn-ru" onclick="setLanguage('ru')">🇷🇺</button>
+        <button class="lang-btn" id="btn-nl" onclick="setLanguage('nl')">🇳🇱</button>
+        <button class="lang-btn" id="btn-pt" onclick="setLanguage('pt')">🇵🇹</button>
+    </div>
+    
+    <button class="map-toggle-btn" onclick="toggleMap()">🗺️ Map View / Mapa</button>
+    <div id="subtitle-text" class="subtitle">Live ranking: Weather, Wind & Wave Safety</div>
+    <div id="last-update" class="last-updated">...</div>
 </header>
 
-<div id="map"></div>
-<div id="app" class="beach-grid"></div>
-<footer class="main-footer">© 2026 Tenerife Beach Rank</footer>
+<div id="map-container"></div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<div id="app" class="beach-grid">
+    <div class="loading">Loading live data from Tenerife...</div>
+</div>
+
+<footer class="main-footer">
+    © 2026 Tenerife Beach Rank. <a href="https://dataraul.github.io/ranking-tenerife-beaches/" style="color: #3498db; text-decoration: none;">Live Site</a>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 <script>
-// === Languages ===
-const i18n = {
-  en:{title:"Tenerife Beach Rank",sub:"Live ranking: Weather, Wind & Waves",temp:"Temp",wind:"Wind",clouds:"Clouds",waves:"Waves",update:"Last Update"},
-  es:{title:"Ranking Playas Tenerife",sub:"Clasificación en vivo por clima, viento y olas",temp:"Temp",wind:"Viento",clouds:"Nubes",waves:"Olas",update:"Última act."},
-  de:{title:"Teneriffa Strand-Ranking",sub:"Live-Ranking nach Wetter, Wind & Wellen",temp:"Temp",wind:"Wind",clouds:"Wolken",waves:"Wellen",update:"Letztes Update"},
-  fr:{title:"Classement Plages Ténérife",sub:"Classement en direct (Météo, Vent, Vagues)",temp:"Temp",wind:"Vent",clouds:"Nuages",waves:"Vagues",update:"Mis à jour"},
-  ru:{title:"Рейтинг пляжей Тенерифе",sub:"Живой рейтинг: погода, ветер и волны",temp:"Темп.",wind:"Ветер",clouds:"Облака",waves:"Волны",update:"Обновлено"},
-  nl:{title:"Tenerife Strand Ranglijst",sub:"Live ranglijst op basis van weer en golven",temp:"Temp",wind:"Wind",clouds:"Wolken",waves:"Golven",update:"Laatste update"},
-  pt:{title:"Ranking Praias Tenerife",sub:"Ranking ao vivo baseado no clima e ondas",temp:"Temp",wind:"Vento",clouds:"Nuvens",waves:"Ondas",update:"Última atualiz."}
-};
+    const i18n = {
+        en: { title: "Tenerife Beach Rank", sub: "Live ranking based on Weather, Wind & Waves", temp: "Temp", wind: "Wind", clouds: "Clouds", waves: "Waves", update: "Last Update", mapHint: "Click name for map" },
+        es: { title: "Ranking Playas Tenerife", sub: "Clasificación en vivo por clima, viento y olas", temp: "Temp", wind: "Viento", clouds: "Nubes", waves: "Olas", update: "Última act.", mapHint: "Clic nombre para mapa" },
+        de: { title: "Teneriffa Strand-Ranking", sub: "Live-Ranking nach Wetter, Wind & Wellen", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Wellen", update: "Letztes Update", mapHint: "Klicken für Karte" },
+        fr: { title: "Classement Plages Ténérife", sub: "Classement en direct (Météo, Vent, Vagues)", temp: "Temp", wind: "Vent", clouds: "Nuages", waves: "Vagues", update: "Mis à jour", mapHint: "Cliquez pour la carte" },
+        ru: { title: "Рейтинг пляжей Тенерифе", sub: "Живой рейтинг: погода, ветер и волны", temp: "Темп.", wind: "Ветер", clouds: "Облака", waves: "Волны", update: "Обновлено", mapHint: "Клик для карты" },
+        nl: { title: "Tenerife Strand Ranglijst", sub: "Live ranglijst op basis van weer en golven", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Golven", update: "Laatste update", mapHint: "Klik voor kaart" },
+        pt: { title: "Ranking Praias Tenerife", sub: "Ranking ao vivo baseado no clima e ondas", temp: "Temp", wind: "Vento", clouds: "Nuvens", waves: "Ondas", update: "Última atualiz.", mapHint: "Clique para mapa" }
+    };
 
-let currentLang='en';
+    // Updated Beach List
+    const beaches = [
+        { name:"Playa de Las Vistas", town:"Los Cristianos", coast:"south", lat:28.0518, lon:-16.7265 },
+        { name:"Playa de Los Cristianos", town:"Los Cristianos", coast:"south", lat:28.0504, lon:-16.7226 },
+        { name:"Playa del Camisón", town:"Playa de las Américas", coast:"south", lat:28.0531, lon:-16.7314 },
+        { name:"Playa de las Américas", town:"Playa de las Américas", coast:"south", lat:28.0583, lon:-16.7358 },
+        { name:"Playa de Troya", town:"Costa Adeje", coast:"south", lat:28.0673, lon:-16.7363 },
+        { name:"Playa de Fañabé", town:"Costa Adeje", coast:"south", lat:28.0877, lon:-16.7408 },
+        { name:"Playa del Duque", town:"Costa Adeje", coast:"south", lat:28.0908, lon:-16.7431 },
+        { name:"Playa de La Pinta", town:"Costa Adeje", coast:"south", lat:28.0776, lon:-16.7380 },
+        { name:"Playa del Bobo", town:"Costa Adeje", coast:"south", lat:28.0734, lon:-16.7388 },
+        { name:"Playa de Torviscas", town:"Costa Adeje", coast:"south", lat:28.0827, lon:-16.7394 },
+        { name:"Playa de La Enramada", town:"Costa Adeje", coast:"south", lat:28.0991, lon:-16.7512 },
+        { name:"Playa Diego Hernández", town:"La Caleta", coast:"south", lat:28.1068, lon:-16.7565 },
+        { name:"Playa de Abama", town:"Guía de Isora", coast:"south", lat:28.1697, lon:-16.7932 },
+        { name:"Playa San Juan", town:"Playa San Juan", coast:"southwest", lat:28.1789, lon:-16.8122 },
+        { name:"Playa de Alcalá", town:"Alcalá", coast:"southwest", lat:28.1994, lon:-16.8286 },
+        { name:"Playa de la Arena", town:"Puerto Santiago", coast:"west", lat:28.2285, lon:-16.8407 },
+        { name:"Playa de los Guíos", town:"Puerto Santiago", coast:"west", lat:28.2464, lon:-16.8431 },
+        { name:"Playa de El Médano", town:"El Médano", coast:"east", lat:28.0435, lon:-16.5385 },
+        { name:"Playa de la Tejita", town:"El Médano", coast:"east", lat:28.0333, lon:-16.5593 },
+        { name:"Playa de la Pelada", town:"El Médano", coast:"east", lat:28.0573, lon:-16.5204 },
+        { name:"Playa del Cabezo", town:"El Médano", coast:"east", lat:28.0478, lon:-16.5302 },
+        { name:"Playa de La Mareta", town:"El Médano", coast:"east", lat:28.0298, lon:-16.5721 },
+        { name:"Playa de Montaña Roja", town:"El Médano", coast:"east", lat:28.0333, lon:-16.5492 },
+        { name:"Playa de las Galletas", town:"Las Galletas", coast:"south", lat:28.0076, lon:-16.6575 },
+        { name:"Playa de la Ballena", town:"Las Galletas", coast:"south", lat:28.0063, lon:-16.6663 },
+        { name:"Playa Amarilla", town:"Las Galletas", coast:"south", lat:28.0084, lon:-16.6479 },
+        { name:"Playa de Los Abrigos", town:"Los Abrigos", coast:"south", lat:28.0264, lon:-16.5916 },
+        { name:"Playa Grande (Porís)", town:"El Porís", coast:"east", lat:28.1601, lon:-16.4262 },
+        { name:"Playa de Las Teresitas", town:"San Andrés", coast:"north", lat:28.5096, lon:-16.1837 },
+        { name:"Playa de Las Gaviotas", town:"San Andrés", coast:"north", lat:28.5147, lon:-16.1687 },
+        { name:"Playa de Antequera", town:"Anaga", coast:"north", lat:28.5447, lon:-16.1264 },
+        { name:"Playa de Benijo", town:"Taganana", coast:"north", lat:28.5724, lon:-16.1867 },
+        { name:"Playa de Almáciga", town:"Taganana", coast:"north", lat:28.5702, lon:-16.2005 },
+        { name:"Playa del Roque de las Bodegas", town:"Taganana", coast:"north", lat:28.5673, lon:-16.2114 },
+        { name:"Playa de Valleseco", town:"San Andrés", coast:"north", lat:28.4831, lon:-16.2238 },
+        { name:"Playa Jardín", town:"Puerto de la Cruz", coast:"north", lat:28.4168, lon:-16.5574 },
+        { name:"Playa de Martiánez", town:"Puerto de la Cruz", coast:"north", lat:28.4189, lon:-16.5383 },
+        { name:"Playa del Castillo", town:"Puerto de la Cruz", coast:"north", lat:28.4183, lon:-16.5539 },
+        { name:"Playa del Muelle", town:"Puerto de la Cruz", coast:"north", lat:28.4186, lon:-16.5501 },
+        { name:"Playa del Bollullo", town:"La Orotava", coast:"north", lat:28.4217, lon:-16.5165 },
+        { name:"Playa de los Patos", town:"La Orotava", coast:"north", lat:28.4239, lon:-16.5076 },
+        { name:"Playa del Ancón", town:"La Guancha", coast:"north", lat:28.4258, lon:-16.4983 },
+        { name:"Playa del Socorro", town:"Los Realejos", coast:"north", lat:28.3941, lon:-16.6041 },
+        { name:"Playa de San Marcos", town:"Icod de los Vinos", coast:"north", lat:28.3753, lon:-16.7138 },
+        { name:"Playa de Agua Dulce", town:"Icod de los Vinos", coast:"north", lat:28.3789, lon:-16.7725 },
+        { name:"Playa de Garachico", town:"Garachico", coast:"north", lat:28.3736, lon:-16.7644 },
+        { name:"Playa de la Caleta", town:"Garachico", coast:"northwest", lat:28.3768, lon:-16.7877 },
+        { name:"Playa del Puertito", town:"Garachico", coast:"northwest", lat:28.3721, lon:-16.8164 },
+        { name:"Playa de la Nea", town:"Radazul", coast:"east", lat:28.4068, lon:-16.3214 },
+        { name:"Playa de Radazul", town:"Radazul", coast:"east", lat:28.4021, lon:-16.3268 },
+        { name:"Playa de Tabaiba", town:"Tabaiba", coast:"east", lat:28.3975, lon:-16.3353 },
+        { name:"Playa de Lima", town:"Boca Cangrejo", coast:"east", lat:28.3123, lon:-16.3689 },
+        { name:"Playa Adeje", town:"Adeje", coast:"south", lat:28.1152, lon:-16.7656 },
+        { name:"Playa Callao Salvaje", town:"Callao Salvaje", coast:"south", lat:28.1221, lon:-16.7765 },
+        { name:"Playa Paraíso", town:"Playa Paraíso", coast:"south", lat:28.1256, lon:-16.7712 },
+        { name:"Playa del Duque Norte", town:"Costa Adeje", coast:"south", lat:28.0934, lon:-16.7456 },
+        { name:"Charco del Viento", town:"La Guancha", coast:"north", lat:28.3724, lon:-16.7022 },
+        { name:"Bajamar Pools", town:"Bajamar", coast:"north", lat:28.5562, lon:-16.3475 },
+        { name:"Punta del Hidalgo", town:"Punta del Hidalgo", coast:"north", lat:28.5694, lon:-16.3276 },
+        { name:"Playa Chimisay", town:"Güímar", coast:"east", lat:28.3465, lon:-16.4352 },
+        { name:"Playa El Socorro", town:"El Socorro", coast:"north", lat:28.3588, lon:-16.5841 },
+        { name:"Playa La Arena", town:"Tacoronte", coast:"north", lat:28.5003, lon:-16.4245 },
+        { name:"Playa Blanca", town:"Costa Adeje", coast:"south", lat:28.1050, lon:-16.7765 },
+        { name:"Playa El Bollullo Natural", town:"La Orotava", coast:"north", lat:28.4200, lon:-16.5180 },
+        { name:"Playa El Porís", town:"El Porís", coast:"east", lat:28.1601, lon:-16.4262 }
+    ];
 
-// === Beaches ===
-const beaches = [
-  { name:"Playa de Las Vistas", town:"Los Cristianos", coast:"south", lat:28.0518, lon:-16.7265 },
-  { name:"Playa de Los Cristianos", town:"Los Cristianos", coast:"south", lat:28.0504, lon:-16.7226 },
-  { name:"Playa del Camisón", town:"Playa de las Américas", coast:"south", lat:28.0531, lon:-16.7314 },
-  { name:"Playa de las Américas", town:"Playa de las Américas", coast:"south", lat:28.0583, lon:-16.7358 },
-  { name:"Playa de Troya", town:"Costa Adeje", coast:"south", lat:28.0673, lon:-16.7363 },
-  { name:"Playa de Fañabé", town:"Costa Adeje", coast:"south", lat:28.0877, lon:-16.7408 },
-  { name:"Playa del Duque", town:"Costa Adeje", coast:"south", lat:28.0908, lon:-16.7431 },
-  { name:"Playa de La Pinta", town:"Costa Adeje", coast:"south", lat:28.0776, lon:-16.7380 },
-  { name:"Playa del Bobo", town:"Costa Adeje", coast:"south", lat:28.0734, lon:-16.7388 },
-  { name:"Playa de Torviscas", town:"Costa Adeje", coast:"south", lat:28.0827, lon:-16.7394 },
-  { name:"Playa de La Enramada", town:"Costa Adeje", coast:"south", lat:28.0991, lon:-16.7512 },
-  { name:"Playa Diego Hernández", town:"La Caleta", coast:"south", lat:28.1068, lon:-16.7565 },
-  { name:"Playa de Abama", town:"Guía de Isora", coast:"south", lat:28.1697, lon:-16.7932 },
-  { name:"Playa San Juan", town:"Playa San Juan", coast:"southwest", lat:28.1789, lon:-16.8122 },
-  { name:"Playa de Alcalá", town:"Alcalá", coast:"southwest", lat:28.1994, lon:-16.8286 },
-  { name:"Playa de la Arena", town:"Puerto Santiago", coast:"west", lat:28.2285, lon:-16.8407 },
-  { name:"Playa de los Guíos", town:"Puerto Santiago", coast:"west", lat:28.2464, lon:-16.8431 },
-  { name:"Playa de El Médano", town:"El Médano", coast:"east", lat:28.0435, lon:-16.5385 },
-  { name:"Playa de la Tejita", town:"El Médano", coast:"east", lat:28.0333, lon:-16.5593 },
-  { name:"Playa de la Pelada", town:"El Médano", coast:"east", lat:28.0573, lon:-16.5204 },
-  { name:"Playa del Cabezo", town:"El Médano", coast:"east", lat:28.0478, lon:-16.5302 },
-  { name:"Playa de La Mareta", town:"El Médano", coast:"east", lat:28.0298, lon:-16.5721 },
-  { name:"Playa de Montaña Roja", town:"El Médano", coast:"east", lat:28.0333, lon:-16.5492 },
-  { name:"Playa de las Galletas", town:"Las Galletas", coast:"south", lat:28.0076, lon:-16.6575 },
-  { name:"Playa de la Ballena", town:"Las Galletas", coast:"south", lat:28.0063, lon:-16.6663 },
-  { name:"Playa Amarilla", town:"Las Galletas", coast:"south", lat:28.0084, lon:-16.6479 },
-  { name:"Playa de Los Abrigos", town:"Los Abrigos", coast:"south", lat:28.0264, lon:-16.5916 },
-  { name:"Playa Grande (Porís)", town:"El Porís", coast:"east", lat:28.1601, lon:-16.4262 },
-  { name:"Playa de Abades", town:"Abades", coast:"east", lat:28.1404, lon:-16.4422 },
-  { name:"Playa de Las Teresitas", town:"San Andrés", coast:"north", lat:28.5096, lon:-16.1837 }, :contentReference[oaicite:0]{index=0}
-  { name:"Playa de Las Gaviotas", town:"San Andrés", coast:"north", lat:28.5147, lon:-16.1687 },
-  { name:"Playa de Antequera", town:"Anaga", coast:"north", lat:28.5447, lon:-16.1264 },
-  { name:"Playa de Benijo", town:"Taganana", coast:"north", lat:28.5724, lon:-16.1867 },
-  { name:"Playa de Almáciga", town:"Taganana", coast:"north", lat:28.5702, lon:-16.2005 },
-  { name:"Playa del Roque de las Bodegas", town:"Taganana", coast:"north", lat:28.5673, lon:-16.2114 }, :contentReference[oaicite:1]{index=1}
-  { name:"Playa de Valleseco", town:"San Andrés", coast:"north", lat:28.4831, lon:-16.2238 },
-  { name:"Playa Jardín", town:"Puerto de la Cruz", coast:"north", lat:28.4168, lon:-16.5574 },
-  { name:"Playa de Martiánez", town:"Puerto de la Cruz", coast:"north", lat:28.4189, lon:-16.5383 },
-  { name:"Playa del Castillo", town:"Puerto de la Cruz", coast:"north", lat:28.4183, lon:-16.5539 },
-  { name:"Playa del Muelle", town:"Puerto de la Cruz", coast:"north", lat:28.4186, lon:-16.5501 },
-  { name:"Playa del Bollullo", town:"La Orotava", coast:"north", lat:28.4217, lon:-16.5165 },
-  { name:"Playa de los Patos", town:"La Orotava", coast:"north", lat:28.4239, lon:-16.5076 },
-  { name:"Playa del Ancón", town:"La Guancha", coast:"north", lat:28.4258, lon:-16.4983 },
-  { name:"Playa del Socorro", town:"Los Realejos", coast:"north", lat:28.3941, lon:-16.6041 },
-  { name:"Playa de San Marcos", town:"Icod de los Vinos", coast:"north", lat:28.3753, lon:-16.7138 },
-  { name:"Playa de Agua Dulce", town:"Icod de los Vinos", coast:"north", lat:28.3789, lon:-16.7725 },
-  { name:"Playa de Garachico", town:"Garachico", coast:"north", lat:28.3736, lon:-16.7644 },
-  { name:"Playa de la Caleta", town:"Garachico", coast:"northwest", lat:28.3768, lon:-16.7877 },
-  { name:"Playa del Puertito", town:"Garachico", coast:"northwest", lat:28.3721, lon:-16.8164 },
-  { name:"Playa de la Nea", town:"Radazul", coast:"east", lat:28.4068, lon:-16.3214 },
-  { name:"Playa de Radazul", town:"Radazul", coast:"east", lat:28.4021, lon:-16.3268 },
-  { name:"Playa de Tabaiba", town:"Tabaiba", coast:"east", lat:28.3975, lon:-16.3353 },
-  { name:"Playa de Lima", town:"Boca Cangrejo", coast:"east", lat:28.3123, lon:-16.3689 },
-  { name:"Playa Adeje", town:"Adeje", coast:"south", lat:28.1152, lon:-16.7656 },
-  { name:"Playa Callao Salvaje", town:"Callao Salvaje", coast:"south", lat:28.1221, lon:-16.7765 },
-  { name:"Playa Paraíso", town:"Playa Paraíso", coast:"south", lat:28.1256, lon:-16.7712 },
-  { name:"Playa del Duque Norte",town:"Costa Adeje",coast:"south",lat:28.0934,lon:-16.7456 },
-  { name:"Charco del Viento", town:"La Guancha", coast:"north", lat:28.3724, lon:-16.7022 },
-  { name:"Bajamar Pools", town:"Bajamar", coast:"north", lat:28.5562, lon:-16.3475 },
-  { name:"Punta del Hidalgo", town:"Punta del Hidalgo", coast:"north", lat:28.5694, lon:-16.3276 },
-  { name:"Playa Chimisay", town:"Güímar", coast:"east", lat:28.3465, lon:-16.4352 },
-  { name:"Playa El Socorro", town:"El Socorro", coast:"north", lat:28.3588, lon:-16.5841 },
-  { name:"Playa La Arena", town:"Tacoronte", coast:"north", lat:28.5003, lon:-16.4245 }, :contentReference[oaicite:2]{index=2}
-  { name:"Playa Blanca", town:"Costa Adeje", coast:"south", lat:28.1050, lon:-16.7765 },
-  { name:"Playa El Bollullo Natural",town:"La Orotava",coast:"north",lat:28.4200,lon:-16.5180},
-  { name:"Playa El Porís", town:"El Porís", coast:"east", lat:28.1601, lon:-16.4262 },
-  { name:"Playa Tajao", town:"San Miguel de Tajao", coast:"south", lat:28.1270, lon:-16.4270 },
-  { name:"Playa de Abades", town:"Abades", coast:"east", lat:28.1404, lon:-16.4422 }
-];
+    let currentLang = 'en';
+    let globalBeachData = [];
+    let map = null;
+    let markers = [];
 
-// === Scoring ===
-function scoreBeach(b){
-  let s=0;
-  // Temp
-  if(b.temp>=22&&b.temp<=30)s+=4;
-  else if(b.temp>=19)s+=2;
-  else s+=1;
-  // Wind softened
-  if(b.wind<18)s+=3;
-  else if(b.wind<26)s+=2;
-  else if(b.wind<32)s+=1;
-  // Clouds
-  if(b.clouds<20)s+=3;
-  else if(b.clouds<50)s+=1.5;
-  // Wave bias north
-  let wave=b.wave;
-  if(b.coast==="north") wave*=0.65;
-  // Status
-  let status=s>=8?'green':s>=6?'yellow':'red';
-  if(b.wave>2) status='red';
-  else if(b.wave>1.2 && status==='green') status='yellow';
-  return {...b,score:Math.round(s),status};
-}
+    async function fetchWeatherData() {
+        const promises = beaches.map(async (beach) => {
+            try {
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${beach.lat}&longitude=${beach.lon}&current=temperature_2m,cloud_cover,wind_speed_10m&wind_speed_unit=kmh`;
+                const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${beach.lat}&longitude=${beach.lon}&current=wave_height`;
 
-// === Emojis ===
-function getEmojis(b){
-  let waveEmoji='🟢';
-  if(b.wave>2) waveEmoji='🔴';
-  else if(b.wave>1.2) waveEmoji='🟡';
-  return {
-    temp:b.temp>28?'🔥':(b.temp>20?'☀️':'🌥️'),
-    wind:b.wind>22?'🚩':(b.wind>12?'🍃':'💨'),
-    clouds:b.clouds>50?'☁️':(b.clouds>15?'⛅':'☀️'),
-    waves:waveEmoji
-  };
-}
+                const [wRes, mRes] = await Promise.all([fetch(weatherUrl), fetch(marineUrl)]);
+                const wData = await wRes.json();
+                const mData = await mRes.json();
 
-// === Render Beaches ===
-let globalBeachData=[];
-function renderBeaches(){
-  const app=document.getElementById('app');
-  app.innerHTML='';
-  globalBeachData.sort((a,b)=>b.score-a.score).forEach(b=>{
-    const e=getEmojis(b);
-    const url=`https://www.google.com/maps?q=${b.lat},${b.lon}`;
-    app.innerHTML+=
-    `<div class="card status-${b.status}">
-      <div class="card-header">
-        <div>
-          <div class="beach-name"><a href="${url}" target="_blank">${b.name}</a></div>
-          <div class="beach-town">${b.town}</div>
-          <div class="beach-map-hint">Click beach to open Google Maps</div>
-        </div>
-        <div class="score-badge">${b.score}/10</div>
-      </div>
-      <div class="metrics">
-        <div class="metric-item"><div class="metric-emoji">${e.temp}</div><div class="metric-label">${i18n[currentLang].temp}</div><div class="metric-value">${b.temp}°C</div></div>
-        <div class="metric-item"><div class="metric-emoji">${e.wind}</div><div class="metric-label">${i18n[currentLang].wind}</div><div class="metric-value">${b.wind} km/h</div></div>
-        <div class="metric-item"><div class="metric-emoji">${e.clouds}</div><div class="metric-label">${i18n[currentLang].clouds}</div><div class="metric-value">${b.clouds}%</div></div>
-        <div class="metric-item"><div class="metric-emoji">${e.waves}</div><div class="metric-label">${i18n[currentLang].waves}</div><div class="metric-value">${b.wave.toFixed(1)} m</div></div>
-      </div>
-    </div>`;
-  });
-}
+                return {
+                    name: beach.name,
+                    town: beach.town,
+                    lat: beach.lat,
+                    lon: beach.lon,
+                    temp: wData.current.temperature_2m,
+                    wind: wData.current.wind_speed_10m,
+                    clouds: wData.current.cloud_cover,
+                    wave: mData.current.wave_height || 0
+                };
+            } catch (e) { return null; }
+        });
 
-// === Map View ===
-let map;
-function showMap(){
-  document.getElementById('app').style.display='none';
-  document.getElementById('map').style.display='block';
-  if(!map){
-    map=L.map('map').setView([28.3,-16.6],10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    globalBeachData.forEach(b=>{
-      const color=b.status==='green'?'green':b.status==='yellow'?'orange':'red';
-      L.circleMarker([b.lat,b.lon],{radius:6,color}).addTo(map).bindPopup(b.name);
-    });
-  }
-}
-function showList(){
-  document.getElementById('map').style.display='none';
-  document.getElementById('app').style.display='grid';
-}
+        const results = await Promise.all(promises);
+        globalBeachData = results.filter(r => r !== null).map(calculateScore);
+        renderBeaches();
+        if(map) updateMapMarkers(); // Update map if it's already open
+        updateTimestamp();
+    }
 
-// === Language ===
-function setLanguage(lang){
-  currentLang=lang;
-  document.getElementById('title-text').textContent=i18n[lang].title;
-  document.getElementById('subtitle-text').textContent=i18n[lang].sub;
-  document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.remove('active'));
-  document.getElementById('btn-'+lang).classList.add('active');
-  renderBeaches();
-  updateTimestamp();
-}
+    function calculateScore(beach) {
+        let score = 0;
+        if (beach.temp >= 22 && beach.temp <= 30) score += 4;
+        else if (beach.temp >= 19 && beach.temp < 22) score += 2;
+        else score += 1;
 
-// === Timestamp ===
-function updateTimestamp(){
-  const now=new Date();
-  const label=i18n[currentLang].update;
-  document.getElementById('last-update').textContent=`${label}: ${now.toLocaleTimeString()}`;
-}
+        if (beach.wind < 15) score += 3;
+        else if (beach.wind < 25) score += 1.5;
 
-// === Mock Initialization ===
-globalBeachData=beaches.map(b=>scoreBeach({...b,temp:24,wind:18,clouds:20,wave:1.1}));
-renderBeaches();
-updateTimestamp();
+        if (beach.clouds < 20) score += 3;
+        else if (beach.clouds < 50) score += 1.5;
+
+        score = Math.round(score);
+        let status = score >= 8 ? 'green' : (score >= 6 ? 'yellow' : 'red');
+
+        // SEA SAFETY BYPASS
+        if (beach.wave > 2.0) status = 'red';
+        else if (beach.wave > 1.2 && status === 'green') status = 'yellow';
+
+        return { ...beach, score, status };
+    }
+
+    function getEmojis(beach) {
+        let waveEmoji = '🟢';
+        if (beach.wave > 2.0) waveEmoji = '🔴';
+        else if (beach.wave > 1.2) waveEmoji = '🟡';
+
+        return {
+            temp: beach.temp > 28 ? '🔥' : (beach.temp > 20 ? '☀️' : '🌥️'),
+            wind: beach.wind > 22 ? '🚩' : (beach.wind > 12 ? '🍃' : '💨'),
+            clouds: beach.clouds > 50 ? '☁️' : (beach.clouds > 15 ? '⛅' : '☀️'),
+            waves: waveEmoji
+        };
+    }
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        document.getElementById('title-text').textContent = i18n[lang].title;
+        document.getElementById('subtitle-text').textContent = i18n[lang].sub;
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`btn-${lang}`).classList.add('active');
+        renderBeaches();
+        updateTimestamp();
+    }
+
+    function updateTimestamp() {
+        const now = new Date();
+        const label = i18n[currentLang].update;
+        document.getElementById('last-update').textContent = `${label}: ${now.toLocaleTimeString()}`;
+    }
+
+    function renderBeaches() {
+        const app = document.getElementById('app');
+        const langData = i18n[currentLang];
+        app.innerHTML = '';
+
+        globalBeachData.sort((a, b) => b.score - a.score).forEach(beach => {
+            const icons = getEmojis(beach);
+            // Google Maps Link
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${beach.lat},${beach.lon}`;
+
+            app.innerHTML += `
+                <div class="card status-${beach.status}">
+                    <div class="card-header">
+                        <a href="${mapsUrl}" target="_blank" class="beach-name-link">
+                            <h2 class="beach-name">${beach.name}</h2>
+                            <div class="town-name">📍 ${beach.town}</div>
+                            <span class="click-hint">${langData.mapHint}</span>
+                        </a>
+                        <div class="score-badge">${beach.score}/10</div>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric-item">
+                            <span class="metric-emoji">${icons.temp}</span>
+                            <span class="metric-label">${langData.temp}</span>
+                            <span class="metric-value">${beach.temp}°C</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-emoji">${icons.wind}</span>
+                            <span class="metric-label">${langData.wind}</span>
+                            <span class="metric-value">${beach.wind} <small>km/h</small></span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-emoji">${icons.clouds}</span>
+                            <span class="metric-label">${langData.clouds}</span>
+                            <span class="metric-value">${beach.clouds}%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-emoji">${icons.waves}</span>
+                            <span class="metric-label">${langData.waves}</span>
+                            <span class="metric-value">${beach.wave}m</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // --- MAP LOGIC ---
+    function toggleMap() {
+        const mapContainer = document.getElementById('map-container');
+        const isHidden = mapContainer.style.display !== 'block';
+        
+        mapContainer.style.display = isHidden ? 'block' : 'none';
+        
+        if (isHidden) {
+            if (!map) initMap();
+            else map.invalidateSize(); // Fixes Leaflet rendering issues when un-hiding
+        }
+    }
+
+    function initMap() {
+        // Initialize Leaflet map centered on Tenerife
+        map = L.map('map-container').setView([28.2916, -16.6291], 10);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        updateMapMarkers();
+    }
+
+    function updateMapMarkers() {
+        if (!map || globalBeachData.length === 0) return;
+
+        // Clear existing markers
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+
+        globalBeachData.forEach(beach => {
+            // Determine Color based on status
+            let color = '#2ecc71'; // Green
+            if (beach.status === 'yellow') color = '#f1c40f';
+            if (beach.status === 'red') color = '#e74c3c';
+
+            const marker = L.circleMarker([beach.lat, beach.lon], {
+                radius: 8,
+                fillColor: color,
+                color: '#fff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+
+            marker.bindPopup(`<b>${beach.name}</b><br>Score: ${beach.score}/10<br>Waves: ${beach.wave}m`);
+            markers.push(marker);
+        });
+    }
+
+    fetchWeatherData();
 </script>
 </body>
 </html>
-
