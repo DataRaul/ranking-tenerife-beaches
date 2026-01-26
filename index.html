@@ -75,8 +75,19 @@
             transition: transform 0.2s; position: relative;
         }
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .beach-name { font-size: 1rem; font-weight: 700; margin: 0; color: #2c3e50; }
-        .town-name { font-size: 0.8rem; color: #7f8c8d; margin-top: 2px; }
+        
+        /* Updated Beach Name Styles for Link */
+        .beach-name { font-size: 1rem; font-weight: 700; margin: 0; }
+        .beach-name a { 
+            color: #2c3e50; text-decoration: none; transition: color 0.2s;
+        }
+        .beach-name a:hover { 
+            color: var(--blue); text-decoration: underline; 
+        }
+
+        .town-name { font-size: 0.8rem; color: #7f8c8d; margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+        .map-hint { font-size: 0.7rem; color: var(--blue); background: #ebf5ff; padding: 1px 6px; border-radius: 4px; }
+
         .score-badge { background: #333; color: white; padding: 4px 10px; border-radius: 15px; font-weight: bold; font-size: 0.9rem; }
 
         .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 12px; }
@@ -321,14 +332,12 @@
     }
 
     function calculateBeachStats(beach, w, m) {
-        // We store the raw values in the object so we can re-score later
         const temp = w.current.temperature_2m;
         const wind = w.current.wind_speed_10m;
         const cloud = w.current.cloud_cover;
         const wave = m.current.wave_height || 0;
         const swellDir = m.current.swell_wave_direction || 0;
 
-        // Default scoring (Standard Mode)
         let score = 5;
         if (temp > 23) score += 2;
         if (wind < 15) score += 2;
@@ -344,14 +353,12 @@
         return { ...beach, temp, wind, cloud, wave, swellDir, score: Math.max(0, score), status };
     }
 
-    // New function to update scores dynamically based on mode
     function recalculateScores(mode) {
         beachData = beachData.map(b => {
             let score = 5;
             let status = 'green';
 
             if (mode === 'sunbathe') {
-                // Sunbathe Logic: Ignore waves, prioritize temp/cloud/wind
                 if (b.temp > 24) score += 3;
                 else if (b.temp > 21) score += 1;
                 else if (b.temp < 19) score -= 2;
@@ -363,11 +370,9 @@
                 if (b.wind < 10) score += 2;
                 else if (b.wind > 25) score -= 3;
 
-                // Status based on comfort (Wind/Cloud) not Safety (Waves)
                 if (b.wind > 28 || b.cloud > 80 || b.temp < 17) status = 'red';
                 else if (b.wind > 20 || b.cloud > 50) status = 'yellow';
             } else {
-                // Standard Logic (Original)
                 if (b.temp > 23) score += 2;
                 if (b.wind < 15) score += 2;
                 if (b.cloud < 20) score += 1;
@@ -389,7 +394,6 @@
         document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.id === `btn-${lang}`));
         document.getElementById('title-text').innerText = i18n[lang].title;
         
-        // Update filter buttons
         document.getElementById('f-all').innerText = i18n[lang].f_all;
         document.getElementById('f-north').innerText = i18n[lang].f_north;
         document.getElementById('f-south').innerText = i18n[lang].f_south;
@@ -408,7 +412,6 @@
             b.classList.toggle('active', btnType === filter);
         });
 
-        // Trigger logic update
         if (filter === 'sunbathe') {
             recalculateScores('sunbathe');
         } else {
@@ -428,7 +431,7 @@
         grid.innerHTML = '';
         
         const filtered = beachData.filter(b => {
-            if (currentFilter === 'all' || currentFilter === 'sunbathe') return true; // Sunbathe shows all beaches, just re-scored
+            if (currentFilter === 'all' || currentFilter === 'sunbathe') return true; 
             if (currentFilter === 'surfing') {
                 const windOk = b.name.includes("Médano") ? true : b.wind < 24;
                 return b.type === 'surf' && b.wave > 0.7 && windOk;
@@ -448,18 +451,24 @@
                 wave: b.status === 'red' ? '⚠️' : (b.status === 'yellow' ? '🟡' : '🟢')
             };
 
-            // Dynamic logic: Show swell only if 'surfing' filter is selected, else show clouds
             const showSwell = currentFilter === 'surfing';
             const dynamicEmoji = showSwell ? `<span class="swell-arrow" style="transform: rotate(${b.swellDir}deg)">↓</span>` : '☁️';
             const dynamicLabel = showSwell ? i18n[currentLang].swell : i18n[currentLang].clouds;
             const dynamicValue = showSwell ? getCardinal(b.swellDir) : `${b.cloud}%`;
+            
+            // Google Maps URL
+            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${b.lat},${b.lon}`;
 
             grid.innerHTML += `
                 <div class="card status-${b.status}">
                     <div class="card-header">
                         <div>
-                            <h2 class="beach-name">${b.name}</h2>
-                            <div class="town-name">📍 ${b.town}</div>
+                            <h2 class="beach-name">
+                                <a href="${mapUrl}" target="_blank" title="View on Google Maps">${b.name}</a>
+                            </h2>
+                            <div class="town-name">
+                                📍 ${b.town} <span class="map-hint">↗ Map</span>
+                            </div>
                         </div>
                         <div class="score-badge">${b.score}/10</div>
                     </div>
