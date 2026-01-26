@@ -50,6 +50,9 @@
         .filter-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
         .filter-btn.special { border-color: var(--purple); color: var(--purple); }
         .filter-btn.special.active { background: var(--purple); color: white; }
+        
+        .filter-btn.special-sun { border-color: var(--orange); color: var(--orange); }
+        .filter-btn.special-sun.active { background: var(--orange); color: white; }
 
         .nav-btn {
             background-color: var(--blue); color: white; border: none; padding: 12px 24px;
@@ -114,12 +117,13 @@
 </header>
 
 <div class="filter-bar" id="filter-container">
-    <button class="filter-btn active" onclick="setFilter('all')">All</button>
-    <button class="filter-btn" onclick="setFilter('north')">North</button>
-    <button class="filter-btn" onclick="setFilter('south')">South</button>
-    <button class="filter-btn" onclick="setFilter('east')">East</button>
-    <button class="filter-btn" onclick="setFilter('west')">West</button>
-    <button class="filter-btn special" onclick="setFilter('surfing')">🏄 Surf Live</button>
+    <button id="f-all" class="filter-btn active" onclick="setFilter('all')">All</button>
+    <button id="f-north" class="filter-btn" onclick="setFilter('north')">North</button>
+    <button id="f-south" class="filter-btn" onclick="setFilter('south')">South</button>
+    <button id="f-east" class="filter-btn" onclick="setFilter('east')">East</button>
+    <button id="f-west" class="filter-btn" onclick="setFilter('west')">West</button>
+    <button id="f-sunbathe" class="filter-btn special-sun" onclick="setFilter('sunbathe')">☀️ Sunbathe</button>
+    <button id="f-surf" class="filter-btn special" onclick="setFilter('surfing')">🏄 Surf Live</button>
 </div>
 
 <div id="list-view" class="active-view">
@@ -141,13 +145,34 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     const i18n = {
-        en: { title: "Tenerife Beach Rank", temp: "Temp", wind: "Wind", clouds: "Clouds", waves: "Waves", updated: "Updated", swell: "Swell" },
-        es: { title: "Ranking Playas Tenerife", temp: "Temp", wind: "Viento", clouds: "Nubes", waves: "Olas", updated: "Act.", swell: "Mar" },
-        de: { title: "Strand-Ranking", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Wellen", updated: "Update", swell: "Dünung" },
-        fr: { title: "Classement Plages", temp: "Temp", wind: "Vent", clouds: "Nuages", waves: "Vagues", updated: "Mis à jour", swell: "Houle" },
-        ru: { title: "Рейтинг пляжей", temp: "Темп", wind: "Ветер", clouds: "Обл.", waves: "Волны", updated: "Обновлено", swell: "Зыбь" },
-        nl: { title: "Strand Ranglijst", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Golven", updated: "Update", swell: "Deining" },
-        pt: { title: "Ranking Praias", temp: "Temp", wind: "Vento", clouds: "Nuvens", waves: "Ondas", updated: "Atu.", swell: "Ondul." }
+        en: { 
+            title: "Tenerife Beach Rank", temp: "Temp", wind: "Wind", clouds: "Clouds", waves: "Waves", updated: "Updated", swell: "Swell",
+            f_all: "All", f_north: "North", f_south: "South", f_east: "East", f_west: "West", f_surf: "🏄 Surf Live", f_sun: "☀️ Sunbathe"
+        },
+        es: { 
+            title: "Ranking Playas Tenerife", temp: "Temp", wind: "Viento", clouds: "Nubes", waves: "Olas", updated: "Act.", swell: "Mar",
+            f_all: "Todas", f_north: "Norte", f_south: "Sur", f_east: "Este", f_west: "Oeste", f_surf: "🏄 Surf en Vivo", f_sun: "☀️ Solo Sol"
+        },
+        de: { 
+            title: "Strand-Ranking", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Wellen", updated: "Update", swell: "Dünung",
+            f_all: "Alle", f_north: "Nord", f_south: "Süd", f_east: "Ost", f_west: "West", f_surf: "🏄 Surfen", f_sun: "☀️ Sonnenbaden"
+        },
+        fr: { 
+            title: "Classement Plages", temp: "Temp", wind: "Vent", clouds: "Nuages", waves: "Vagues", updated: "Mis à jour", swell: "Houle",
+            f_all: "Toutes", f_north: "Nord", f_south: "Sud", f_east: "Est", f_west: "Ouest", f_surf: "🏄 Surf Live", f_sun: "☀️ Bronzage"
+        },
+        ru: { 
+            title: "Рейтинг пляжей", temp: "Темп", wind: "Ветер", clouds: "Обл.", waves: "Волны", updated: "Обновлено", swell: "Зыбь",
+            f_all: "Все", f_north: "Север", f_south: "Юг", f_east: "Восток", f_west: "Запад", f_surf: "🏄 Серфинг", f_sun: "☀️ Загорать"
+        },
+        nl: { 
+            title: "Strand Ranglijst", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Golven", updated: "Update", swell: "Deining",
+            f_all: "Alle", f_north: "Noord", f_south: "Zuid", f_east: "Oost", f_west: "West", f_surf: "🏄 Surfen", f_sun: "☀️ Zonnen"
+        },
+        pt: { 
+            title: "Ranking Praias", temp: "Temp", wind: "Vento", clouds: "Nuvens", waves: "Ondas", updated: "Atu.", swell: "Ondul.",
+            f_all: "Todas", f_north: "Norte", f_south: "Sul", f_east: "Este", f_west: "Oeste", f_surf: "🏄 Surf Live", f_sun: "☀️ Apanhar Sol"
+        }
     };
 
     const beaches = [
@@ -296,12 +321,14 @@
     }
 
     function calculateBeachStats(beach, w, m) {
+        // We store the raw values in the object so we can re-score later
         const temp = w.current.temperature_2m;
         const wind = w.current.wind_speed_10m;
         const cloud = w.current.cloud_cover;
         const wave = m.current.wave_height || 0;
         const swellDir = m.current.swell_wave_direction || 0;
 
+        // Default scoring (Standard Mode)
         let score = 5;
         if (temp > 23) score += 2;
         if (wind < 15) score += 2;
@@ -317,10 +344,60 @@
         return { ...beach, temp, wind, cloud, wave, swellDir, score: Math.max(0, score), status };
     }
 
+    // New function to update scores dynamically based on mode
+    function recalculateScores(mode) {
+        beachData = beachData.map(b => {
+            let score = 5;
+            let status = 'green';
+
+            if (mode === 'sunbathe') {
+                // Sunbathe Logic: Ignore waves, prioritize temp/cloud/wind
+                if (b.temp > 24) score += 3;
+                else if (b.temp > 21) score += 1;
+                else if (b.temp < 19) score -= 2;
+
+                if (b.cloud < 10) score += 3;
+                else if (b.cloud < 30) score += 1;
+                else if (b.cloud > 60) score -= 3;
+
+                if (b.wind < 10) score += 2;
+                else if (b.wind > 25) score -= 3;
+
+                // Status based on comfort (Wind/Cloud) not Safety (Waves)
+                if (b.wind > 28 || b.cloud > 80 || b.temp < 17) status = 'red';
+                else if (b.wind > 20 || b.cloud > 50) status = 'yellow';
+            } else {
+                // Standard Logic (Original)
+                if (b.temp > 23) score += 2;
+                if (b.wind < 15) score += 2;
+                if (b.cloud < 20) score += 1;
+                
+                const isNorth = b.coast.includes('north');
+                const waveDanger = isNorth ? 2.2 : 1.6;
+                
+                if (b.wave > waveDanger) status = 'red';
+                else if (b.wave > (waveDanger - 0.5)) status = 'yellow';
+                if (status === 'red') score -= 4;
+            }
+
+            return { ...b, score: Math.max(0, score), status };
+        });
+    }
+
     function setLanguage(lang) {
         currentLang = lang;
         document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.id === `btn-${lang}`));
         document.getElementById('title-text').innerText = i18n[lang].title;
+        
+        // Update filter buttons
+        document.getElementById('f-all').innerText = i18n[lang].f_all;
+        document.getElementById('f-north').innerText = i18n[lang].f_north;
+        document.getElementById('f-south').innerText = i18n[lang].f_south;
+        document.getElementById('f-east').innerText = i18n[lang].f_east;
+        document.getElementById('f-west').innerText = i18n[lang].f_west;
+        document.getElementById('f-sunbathe').innerText = i18n[lang].f_sun;
+        document.getElementById('f-surf').innerText = i18n[lang].f_surf;
+
         render();
     }
 
@@ -330,6 +407,14 @@
             const btnType = b.getAttribute('onclick').match(/'([^']+)'/)[1];
             b.classList.toggle('active', btnType === filter);
         });
+
+        // Trigger logic update
+        if (filter === 'sunbathe') {
+            recalculateScores('sunbathe');
+        } else {
+            recalculateScores('standard');
+        }
+
         render();
     }
 
@@ -343,7 +428,7 @@
         grid.innerHTML = '';
         
         const filtered = beachData.filter(b => {
-            if (currentFilter === 'all') return true;
+            if (currentFilter === 'all' || currentFilter === 'sunbathe') return true; // Sunbathe shows all beaches, just re-scored
             if (currentFilter === 'surfing') {
                 const windOk = b.name.includes("Médano") ? true : b.wind < 24;
                 return b.type === 'surf' && b.wave > 0.7 && windOk;
@@ -421,7 +506,7 @@
         markers.forEach(m => map.removeLayer(m));
         markers = [];
         beachData.filter(b => {
-            if (currentFilter === 'all') return true;
+            if (currentFilter === 'all' || currentFilter === 'sunbathe') return true;
             if (currentFilter === 'surfing') return b.type === 'surf' && b.wave > 0.8;
             return b.coast === currentFilter;
         }).forEach(b => {
