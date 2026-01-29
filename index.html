@@ -76,7 +76,6 @@
         }
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
         
-        /* Updated Beach Name Styles for Link */
         .beach-name { font-size: 1rem; font-weight: 700; margin: 0; }
         .beach-name a { 
             color: #2c3e50; text-decoration: none; transition: color 0.2s;
@@ -138,14 +137,14 @@
 </div>
 
 <div id="list-view" class="active-view">
-    <div style="text-align: center;"><button class="nav-btn" onclick="switchView('map')">🗺️ Open Map View</button></div>
+    <div style="text-align: center;"><button class="nav-btn" id="btn-open-map" onclick="switchView('map')">🗺️ Open Map View</button></div>
     <div id="app" class="beach-grid">
         <div class="loading-screen">Updating live rankings...</div>
     </div>
 </div>
 
 <div id="map-view">
-    <div style="text-align: center;"><button class="nav-btn" onclick="switchView('list')">⬅️ Back to List</button></div>
+    <div style="text-align: center;"><button class="nav-btn" id="btn-back-list" onclick="switchView('list')">⬅️ Back to List</button></div>
     <div id="map-container"></div>
 </div>
 
@@ -158,31 +157,38 @@
     const i18n = {
         en: { 
             title: "Tenerife Beach Rank", temp: "Temp", wind: "Wind", clouds: "Clouds", waves: "Waves", updated: "Updated", swell: "Swell",
-            f_all: "All", f_north: "North", f_south: "South", f_east: "East", f_west: "West", f_surf: "🏄 Surf Live", f_sun: "☀️ Sunbathe"
+            f_all: "All", f_north: "North", f_south: "South", f_east: "East", f_west: "West", f_surf: "🏄 Surf Live", f_sun: "☀️ Sunbathe",
+            open_map: "🗺️ Open Map View", back_list: "⬅️ Back to List"
         },
         es: { 
             title: "Ranking Playas Tenerife", temp: "Temp", wind: "Viento", clouds: "Nubes", waves: "Olas", updated: "Act.", swell: "Mar",
-            f_all: "Todas", f_north: "Norte", f_south: "Sur", f_east: "Este", f_west: "Oeste", f_surf: "🏄 Surf en Vivo", f_sun: "☀️ Solo Sol"
+            f_all: "Todas", f_north: "Norte", f_south: "Sur", f_east: "Este", f_west: "Oeste", f_surf: "🏄 Surf en Vivo", f_sun: "☀️ Solo Sol",
+            open_map: "🗺️ Ver Mapa", back_list: "⬅️ Volver a la Lista"
         },
         de: { 
             title: "Strand-Ranking", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Wellen", updated: "Update", swell: "Dünung",
-            f_all: "Alle", f_north: "Nord", f_south: "Süd", f_east: "Ost", f_west: "West", f_surf: "🏄 Surfen", f_sun: "☀️ Sonnenbaden"
+            f_all: "Alle", f_north: "Nord", f_south: "Süd", f_east: "Ost", f_west: "West", f_surf: "🏄 Surfen", f_sun: "☀️ Sonnenbaden",
+            open_map: "🗺️ Kartenansicht öffnen", back_list: "⬅️ Zurück zur Liste"
         },
         fr: { 
             title: "Classement Plages", temp: "Temp", wind: "Vent", clouds: "Nuages", waves: "Vagues", updated: "Mis à jour", swell: "Houle",
-            f_all: "Toutes", f_north: "Nord", f_south: "Sud", f_east: "Est", f_west: "Ouest", f_surf: "🏄 Surf Live", f_sun: "☀️ Bronzage"
+            f_all: "Toutes", f_north: "Nord", f_south: "Sud", f_east: "Est", f_west: "Ouest", f_surf: "🏄 Surf Live", f_sun: "☀️ Bronzage",
+            open_map: "🗺️ Ouvrir la Carte", back_list: "⬅️ Retour à la Liste"
         },
         ru: { 
             title: "Рейтинг пляжей", temp: "Темп", wind: "Ветер", clouds: "Обл.", waves: "Волны", updated: "Обновлено", swell: "Зыбь",
-            f_all: "Все", f_north: "Север", f_south: "Юг", f_east: "Восток", f_west: "Запад", f_surf: "🏄 Серфинг", f_sun: "☀️ Загорать"
+            f_all: "Все", f_north: "Север", f_south: "Юг", f_east: "Восток", f_west: "Запад", f_surf: "🏄 Серфинг", f_sun: "☀️ Загорать",
+            open_map: "🗺️ Открыть Карту", back_list: "⬅️ Назад к списку"
         },
         nl: { 
             title: "Strand Ranglijst", temp: "Temp", wind: "Wind", clouds: "Wolken", waves: "Golven", updated: "Update", swell: "Deining",
-            f_all: "Alle", f_north: "Noord", f_south: "Zuid", f_east: "Oost", f_west: "West", f_surf: "🏄 Surfen", f_sun: "☀️ Zonnen"
+            f_all: "Alle", f_north: "Noord", f_south: "Zuid", f_east: "Oost", f_west: "West", f_surf: "🏄 Surfen", f_sun: "☀️ Zonnen",
+            open_map: "🗺️ Kaart Weergeven", back_list: "⬅️ Terug naar Lijst"
         },
         pt: { 
             title: "Ranking Praias", temp: "Temp", wind: "Vento", clouds: "Nuvens", waves: "Ondas", updated: "Atu.", swell: "Ondul.",
-            f_all: "Todas", f_north: "Norte", f_south: "Sul", f_east: "Este", f_west: "Oeste", f_surf: "🏄 Surf Live", f_sun: "☀️ Apanhar Sol"
+            f_all: "Todas", f_north: "Norte", f_south: "Sul", f_east: "Este", f_west: "Oeste", f_surf: "🏄 Surf Live", f_sun: "☀️ Apanhar Sol",
+            open_map: "🗺️ Abrir Mapa", back_list: "⬅️ Voltar à Lista"
         }
     };
 
@@ -392,8 +398,9 @@
     function setLanguage(lang) {
         currentLang = lang;
         document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.id === `btn-${lang}`));
-        document.getElementById('title-text').innerText = i18n[lang].title;
         
+        // Update Static Text
+        document.getElementById('title-text').innerText = i18n[lang].title;
         document.getElementById('f-all').innerText = i18n[lang].f_all;
         document.getElementById('f-north').innerText = i18n[lang].f_north;
         document.getElementById('f-south').innerText = i18n[lang].f_south;
@@ -401,6 +408,10 @@
         document.getElementById('f-west').innerText = i18n[lang].f_west;
         document.getElementById('f-sunbathe').innerText = i18n[lang].f_sun;
         document.getElementById('f-surf').innerText = i18n[lang].f_surf;
+        
+        // Update View Switch Buttons
+        document.getElementById('btn-open-map').innerText = i18n[lang].open_map;
+        document.getElementById('btn-back-list').innerText = i18n[lang].back_list;
 
         render();
     }
@@ -456,7 +467,6 @@
             const dynamicLabel = showSwell ? i18n[currentLang].swell : i18n[currentLang].clouds;
             const dynamicValue = showSwell ? getCardinal(b.swellDir) : `${b.cloud}%`;
             
-            // Google Maps URL
             const mapUrl = `https://www.google.com/maps/search/?api=1&query=${b.lat},${b.lon}`;
 
             grid.innerHTML += `
