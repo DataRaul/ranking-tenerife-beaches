@@ -3,7 +3,7 @@
 👉 **[Access the Website](https://dataraul.github.io/ranking-tenerife-beaches/)**
 or share https://bit.ly/tenerife-beaches-rank
 
-A real-time weather dashboard that ranks **60 beaches** across Tenerife. The application calculates a live "Beachability Score" out of 10 by analyzing wind, temperature, cloud cover, and **wave heights** to help you find the perfect spot on the island.
+A real-time weather dashboard that ranks **100 beaches** across Tenerife. The application calculates a live "Beachability Score" out of 10 by analyzing wind, temperature, cloud cover, and **wave heights** to help you find the perfect spot on the island.
 
 ## ✨ Features
 
