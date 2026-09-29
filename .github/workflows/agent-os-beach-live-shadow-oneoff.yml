@@ -45,9 +45,10 @@ jobs:
           "$cli" find "Tenerife Beach Rank" > "$RUNNER_TEMP/agent-os-find.txt"
           "$cli" console > "$RUNNER_TEMP/agent-os-console.txt"
           "$cli" requests > "$RUNNER_TEMP/agent-os-requests.txt"
-          echo "AGENT_OS_BEACH_SNAPSHOT_HEAD"; head -c 1600 "$RUNNER_TEMP/agent-os-snapshot.txt"; echo; grep -F "Tenerife Beach Rank" "$RUNNER_TEMP/agent-os-snapshot.txt" >/dev/null
-          echo "AGENT_OS_BEACH_FIND_HEAD"; head -c 1000 "$RUNNER_TEMP/agent-os-find.txt"; echo; grep -F "Tenerife Beach Rank" "$RUNNER_TEMP/agent-os-find.txt" >/dev/null
-          echo "AGENT_OS_BEACH_REQUESTS_HEAD"; head -c 1000 "$RUNNER_TEMP/agent-os-requests.txt"; echo; grep -F "dataraul.github.io/ranking-tenerife-beaches/" "$RUNNER_TEMP/agent-os-requests.txt" >/dev/null
+          grep -F "Page URL: https://dataraul.github.io/ranking-tenerife-beaches/" "$RUNNER_TEMP/agent-os-snapshot.txt" >/dev/null
+          grep -F "Tenerife Beach Rank" "$RUNNER_TEMP/agent-os-snapshot.txt" >/dev/null
+          grep -F "Tenerife Beach Rank" "$RUNNER_TEMP/agent-os-find.txt" >/dev/null
+          grep -F "[GET] https://api.open-meteo.com/v1/forecast" "$RUNNER_TEMP/agent-os-requests.txt" >/dev/null
           cd "$GITHUB_WORKSPACE"
           test -z "$(git status --porcelain)"
           echo "AGENT_OS_BEACH_LIVE_BROWSER_SHADOW_OBSERVATION_PASS"
